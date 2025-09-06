@@ -11,11 +11,10 @@ Una hermosa aplicación web que muestra las reglas de una relación especial ent
 - **Interactivo**: Grid de reglas clickeable
 - **Animaciones**: Múltiples animaciones CSS para una experiencia visual atractiva
 
-## 🚀 Tecnologías Utilizadas
+## 🚀 Cómo usar
 
-- **HTML5**: Estructura semántica
-- **CSS3**: Estilos modernos con animaciones y gradientes
-- **JavaScript**: Interactividad y funcionalidad dinámica
+1. Simplemente abre el archivo `index.html` en tu navegador web
+2. ¡Disfruta explorando las 27 reglas del amor! 💕
 
 ## 📱 Características Responsive
 
