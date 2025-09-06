@@ -55,13 +55,14 @@ function init() {
 
 // Create floating hearts
 function createFloatingHearts() {
-    for (let i = 0; i < 15; i++) {
+    for (let i = 0; i < 25; i++) {
         const heart = document.createElement('div');
         heart.className = 'floating-heart';
-        heart.textContent = '💕';
+        const hearts = ['💕', '💖', '💝', '💗', '💓', '💘', '💞', '💟'];
+        heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
         heart.style.left = Math.random() * 100 + '%';
         heart.style.top = Math.random() * 100 + '%';
-        heart.style.animationDelay = (i * 200) + 'ms';
+        heart.style.animationDelay = (i * 150) + 'ms';
         heart.style.opacity = '0';
         floatingHeartsContainer.appendChild(heart);
     }
@@ -69,13 +70,14 @@ function createFloatingHearts() {
 
 // Create sparkle effects
 function createSparkleEffects() {
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 20; i++) {
         const sparkle = document.createElement('div');
         sparkle.className = 'sparkle';
-        sparkle.textContent = '✨';
+        const sparkles = ['✨', '⭐', '🌟', '💫', '⚡'];
+        sparkle.textContent = sparkles[Math.floor(Math.random() * sparkles.length)];
         sparkle.style.left = Math.random() * 100 + '%';
         sparkle.style.top = Math.random() * 100 + '%';
-        sparkle.style.animationDelay = (i * 300) + 'ms';
+        sparkle.style.animationDelay = (i * 200) + 'ms';
         sparkleEffectsContainer.appendChild(sparkle);
     }
 }
@@ -88,7 +90,7 @@ function generateRulesGrid() {
         ruleItem.className = 'rule-item';
         ruleItem.innerHTML = `
             <div class="rule-item-header">
-                <span>⭐</span>
+                <span>💖</span>
                 <span class="rule-item-title">Regla ${index + 1}</span>
             </div>
             <p class="rule-item-preview">${rule.substring(0, 80)}...</p>
@@ -164,7 +166,43 @@ function startHeartAnimation() {
         hearts.forEach(heart => {
             heart.style.opacity = showHearts ? '1' : '0';
         });
-    }, 2000);
+    }, 3000);
+    
+    // Add random heart bursts
+    setInterval(() => {
+        createHeartBurst();
+    }, 8000);
+}
+
+// Create heart burst effect
+function createHeartBurst() {
+    const burstContainer = document.createElement('div');
+    burstContainer.style.position = 'absolute';
+    burstContainer.style.left = Math.random() * 100 + '%';
+    burstContainer.style.top = Math.random() * 100 + '%';
+    burstContainer.style.pointerEvents = 'none';
+    burstContainer.style.zIndex = '5';
+    
+    for (let i = 0; i < 8; i++) {
+        const heart = document.createElement('div');
+        heart.textContent = '💕';
+        heart.style.position = 'absolute';
+        heart.style.fontSize = '1.5rem';
+        heart.style.color = '#ff1493';
+        heart.style.animation = `heartBurst 2s ease-out forwards`;
+        heart.style.animationDelay = (i * 100) + 'ms';
+        
+        const angle = (i / 8) * 360;
+        heart.style.transform = `rotate(${angle}deg)`;
+        
+        burstContainer.appendChild(heart);
+    }
+    
+    document.body.appendChild(burstContainer);
+    
+    setTimeout(() => {
+        document.body.removeChild(burstContainer);
+    }, 2500);
 }
 
 // Initialize when DOM is loaded
