@@ -1,72 +1,111 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  Dimensions,
+  TextInput,
   TouchableOpacity,
-  Animated,
-  Image,
+  FlatList,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
-
-import { RootStackParamList } from '../types/navigation';
+import { useAuth } from '../contexts/AuthContext';
+import { authService, Message } from '../lib/supabase';
 import FloatingHearts from '../components/FloatingHearts';
-import SparkleEffects from '../components/SparkleEffects';
+import DaysTogetherWidget from '../components/widgets/DaysTogetherWidget';
+import NextEventWidget from '../components/widgets/NextEventWidget';
+import MessagesWidget from '../components/widgets/MessagesWidget';
+import PhotosWidget from '../components/widgets/PhotosWidget';
+import DistanceWidget from '../components/widgets/DistanceWidget';
+import ActivitiesWidget from '../components/widgets/ActivitiesWidget';
+import DiaryWidget from '../components/widgets/DiaryWidget';
+import WishlistWidget from '../components/widgets/WishlistWidget';
+import SurpriseRouletteModal from '../components/SurpriseRouletteModal';
 
-type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
-
-const { width, height } = Dimensions.get('window');
-
-const HomeScreen: React.FC = () => {
-  const navigation = useNavigation<HomeScreenNavigationProp>();
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const scaleAnim = useRef(new Animated.Value(0.8)).current;
-  const heartBeatAnim = useRef(new Animated.Value(1)).current;
+const ChatScreen: React.FC = () => {
+  const navigation = useNavigation();
+  const { user, userProfile, couple } = useAuth();
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [loading, setLoading] = useState(true);
+  const flatListRef = useRef<FlatList>(null);
+  const [showSurpriseRoulette, setShowSurpriseRoulette] = useState(false);
 
   useEffect(() => {
-    // Entrance animation
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 1000,
-        useNativeDriver: true,
-      }),
-      Animated.spring(scaleAnim, {
-        toValue: 1,
-        tension: 50,
-        friction: 7,
-        useNativeDriver: true,
-      }),
-    ]).start();
-
-    // Heart beat animation
-    const heartBeat = () => {
-      Animated.sequence([
-        Animated.timing(heartBeatAnim, {
-          toValue: 1.2,
-          duration: 600,
-          useNativeDriver: true,
-        }),
-        Animated.timing(heartBeatAnim, {
-          toValue: 1,
-          duration: 600,
-          useNativeDriver: true,
-        }),
-      ]).start(() => {
-        setTimeout(heartBeat, 2000);
+    if (couple?.id) {
+      loadMessages();
+      
+      // Suscribirse a mensajes en tiempo real
+      const subscription = authService.subscribeToMessages(couple.id, (payload) => {
+        if (payload.new) {
+          const newMsg = payload.new as Message;
+          setMessages(prev => [newMsg, ...prev]);
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        }
       });
-    };
-    heartBeat();
-  }, []);
 
-  const handleEnterApp = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    navigation.navigate('Rules');
+      return () => {
+        subscription.unsubscribe();
+      };
+    }
+  }, [couple?.id]);
+
+  const loadMessages = async () => {
+    if (!couple?.id) return;
+    
+    try {
+      const data = await authService.getMessages(couple.id);
+      setMessages(data);
+    } catch (error: any) {
+      Alert.alert('Error', 'No se pudieron cargar los mensajes');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const sendMessage = async () => {
+    if (!newMessage.trim() || !couple?.id || !user?.id) return;
+
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      await authService.sendMessage(couple.id, user.id, newMessage.trim());
+      setNewMessage('');
+    } catch (error: any) {
+      Alert.alert('Error', 'No se pudo enviar el mensaje');
+    }
+  };
+
+  const renderMessage = ({ item }: { item: Message }) => {
+    const isMyMessage = item.sender_id === user?.id;
+    
+    return (
+      <View style={[
+        styles.messageContainer,
+        isMyMessage ? styles.myMessage : styles.partnerMessage
+      ]}>
+        <BlurView 
+          intensity={20} 
+          style={[
+            styles.messageBubble,
+            isMyMessage ? styles.myBubble : styles.partnerBubble
+          ]}
+        >
+          <Text style={styles.messageText}>{item.content}</Text>
+          <Text style={styles.messageTime}>
+            {new Date(item.created_at).toLocaleTimeString('es-ES', {
+              hour: '2-digit',
+              minute: '2-digit'
+            })}
+          </Text>
+        </BlurView>
+      </View>
+    );
   };
 
   return (
@@ -75,123 +114,78 @@ const HomeScreen: React.FC = () => {
       style={styles.container}
     >
       <FloatingHearts />
-      <SparkleEffects />
       
-      <Animated.View
-        style={[
-          styles.content,
-      {/* Quick Actions */}
-      <View style={styles.quickActions}>
-        <TouchableOpacity
-          style={styles.quickActionButton}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            navigation.navigate('DailyQuestions' as never);
-          }}
-          activeOpacity={0.8}
-        >
-          <BlurView intensity={20} style={styles.quickActionBlur}>
-            <Text style={styles.quickActionEmoji}>❓</Text>
-            <Text style={styles.quickActionText}>Pregunta del Día</Text>
-          </BlurView>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.quickActionButton}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            navigation.navigate('Counters' as never);
-          }}
-          activeOpacity={0.8}
-        >
-          <BlurView intensity={20} style={styles.quickActionBlur}>
-            <Text style={styles.quickActionEmoji}>📊</Text>
-            <Text style={styles.quickActionText}>Contadores</Text>
-          </BlurView>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.quickActionButton}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            navigation.navigate('Activities' as never);
-          }}
-          activeOpacity={0.8}
-        >
-          <BlurView intensity={20} style={styles.quickActionBlur}>
-            <Text style={styles.quickActionEmoji}>🎯</Text>
-            <Text style={styles.quickActionText}>Actividades</Text>
-          </BlurView>
-        </TouchableOpacity>
-      </View>
-
-          {
-            opacity: fadeAnim,
-            transform: [{ scale: scaleAnim }],
-          },
-        ]}
-      >
-        {/* Crown and Title */}
-        <View style={styles.titleContainer}>
-          <Text style={styles.crown}>👑</Text>
-          <Text style={styles.mainTitle}>💕 Reglas del Amor Eterno 💕</Text>
-          <Text style={styles.crown}>👑</Text>
-        </View>
-
-        {/* Couple Container */}
-        <View style={styles.coupleContainer}>
-          <View style={styles.person}>
-            <View style={styles.avatar}>
-              <View style={styles.avatarPlaceholder}>
-                <Text style={styles.avatarText}>O</Text>
-              </View>
-            </View>
-            <Text style={styles.personName}>Oscar</Text>
-          </View>
-
-          <Animated.View
-            style={[
-              styles.heartCenter,
-              { transform: [{ scale: heartBeatAnim }] },
-            ]}
+      <SafeAreaView style={styles.safeArea}>
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
+            activeOpacity={0.7}
           >
-            <Text style={styles.heartIcon}>❤️</Text>
-            <Text style={styles.loveText}>💕 Amor Infinito 💕</Text>
-          </Animated.View>
-
-          <View style={styles.person}>
-            <View style={[styles.avatar, styles.avatarDelayed]}>
-              <View style={styles.avatarPlaceholder}>
-                <Text style={styles.avatarText}>Y</Text>
-              </View>
-            </View>
-            <Text style={styles.personName}>Yuritzy</Text>
+            <Text style={styles.backButtonText}>← Volver</Text>
+          </TouchableOpacity>
+          
+          <Text style={styles.headerTitle}>💕 Chat Privado</Text>
+          
+          <View style={styles.headerRight}>
+            <Text style={styles.coupleStatus}>🟢 En línea</Text>
           </View>
         </View>
 
-        {/* Enter Button */}
-        <TouchableOpacity
-          style={styles.enterButton}
-          onPress={handleEnterApp}
-          activeOpacity={0.8}
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.chatContainer}
         >
-          <BlurView intensity={20} style={styles.buttonBlur}>
-            <LinearGradient
-              colors={['#ff1493', '#8b008b']}
-              style={styles.buttonGradient}
-            >
-              <Text style={styles.buttonText}>Ver Nuestras Reglas</Text>
-              <Text style={styles.buttonEmoji}>💖</Text>
-            </LinearGradient>
-          </BlurView>
-        </TouchableOpacity>
+          {/* Messages */}
+          <FlatList
+            ref={flatListRef}
+            data={messages}
+            renderItem={renderMessage}
+            keyExtractor={(item) => item.id}
+            style={styles.messagesList}
+            contentContainerStyle={styles.messagesContent}
+            inverted
+            showsVerticalScrollIndicator={false}
+          />
 
-        {/* Golden Rule Preview */}
-        <View style={styles.goldenPreview}>
-          <Text style={styles.goldenTitle}>🌟 Regla de Oro (#30)</Text>
-          <Text style={styles.goldenText}>Amarnos por siempre 💗🤍</Text>
-        </View>
-      </Animated.View>
+          {/* Input */}
+          <BlurView intensity={20} style={styles.inputContainer}>
+            <TextInput
+              style={styles.textInput}
+              value={newMessage}
+              onChangeText={setNewMessage}
+              placeholder="Escribe un mensaje de amor..."
+              placeholderTextColor="#999"
+              multiline
+              maxLength={500}
+            />
+            
+            <TouchableOpacity
+              style={[
+                styles.sendButton,
+                !newMessage.trim() && styles.sendButtonDisabled
+              ]}
+              onPress={sendMessage}
+              disabled={!newMessage.trim()}
+              activeOpacity={0.8}
+            >
+              <LinearGradient
+                colors={newMessage.trim() ? ['#ff1493', '#8b008b'] : ['#666', '#444']}
+                style={styles.sendButtonGradient}
+              >
+                <Text style={styles.sendButtonText}>💕</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </BlurView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+
+      {/* Surprise Roulette Modal */}
+      <SurpriseRouletteModal
+        visible={showSurpriseRoulette}
+        onClose={() => setShowSurpriseRoulette(false)}
+      />
     </LinearGradient>
   );
 };
@@ -200,187 +194,129 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  content: {
+  safeArea: {
     flex: 1,
-    justifyContent: 'center',
+  },
+  header: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingTop: 60,
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 20, 147, 0.3)',
   },
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 40,
-    gap: 15,
-  },
-  crown: {
-    fontSize: 40,
-    textShadowColor: '#ffd700',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 15,
-  },
-  mainTitle: {
-    fontSize: width > 400 ? 28 : 24,
-    fontWeight: 'bold',
-    color: '#ff69b4',
-    textAlign: 'center',
-    textShadowColor: '#ff1493',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 20,
-  },
-  coupleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 50,
-    gap: 30,
-  },
-  person: {
-    alignItems: 'center',
-  },
-  avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    marginBottom: 10,
-    borderWidth: 3,
-    borderColor: '#ff1493',
-    shadowColor: '#ff1493',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 15,
-    elevation: 10,
-  },
-  avatarDelayed: {
-    // Animation delay handled in component
-  },
-  avatarPlaceholder: {
-    flex: 1,
-    backgroundColor: '#ff69b4',
-    borderRadius: 37,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  avatarText: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: 'white',
-  },
-  personName: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#ff69b4',
-    textShadowColor: '#ff1493',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 10,
-  },
-  heartCenter: {
-    alignItems: 'center',
-  },
-  heartIcon: {
-    fontSize: 60,
-    marginBottom: 10,
-    textShadowColor: '#ff1493',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 20,
-  },
-  loveText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#ff69b4',
-    textShadowColor: '#ff1493',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 10,
-  },
-  quickActions: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 30,
-    paddingHorizontal: 10,
-  },
-  quickActionButton: {
-    flex: 1,
-    marginHorizontal: 5,
-    borderRadius: 15,
-    overflow: 'hidden',
-  },
-  quickActionBlur: {
+  backButton: {
     backgroundColor: 'rgba(255, 20, 147, 0.2)',
-    borderRadius: 15,
-    padding: 15,
-    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: '#ff1493',
   },
-  quickActionEmoji: {
-    fontSize: 24,
-    marginBottom: 8,
-  },
-  quickActionText: {
+  backButtonText: {
     color: '#ff69b4',
-    fontSize: 12,
+    fontSize: 16,
     fontWeight: '600',
-    textAlign: 'center',
   },
-  enterButton: {
-    marginBottom: 40,
-    borderRadius: 25,
-    overflow: 'hidden',
-    shadowColor: '#ff1493',
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.6,
-    shadowRadius: 15,
-    elevation: 10,
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#ff69b4',
+    textShadowColor: '#ff1493',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
   },
-  buttonBlur: {
-    borderRadius: 25,
-    overflow: 'hidden',
+  headerRight: {
+    alignItems: 'flex-end',
   },
-  buttonGradient: {
+  coupleStatus: {
+    fontSize: 12,
+    color: '#10b981',
+    fontWeight: '600',
+  },
+  chatContainer: {
+    flex: 1,
+  },
+  messagesList: {
+    flex: 1,
+    paddingHorizontal: 20,
+  },
+  messagesContent: {
+    paddingVertical: 20,
+  },
+  messageContainer: {
+    marginBottom: 15,
+  },
+  myMessage: {
+    alignItems: 'flex-end',
+  },
+  partnerMessage: {
+    alignItems: 'flex-start',
+  },
+  messageBubble: {
+    maxWidth: '80%',
+    borderRadius: 20,
+    padding: 15,
+    borderWidth: 1,
+  },
+  myBubble: {
+    backgroundColor: 'rgba(255, 20, 147, 0.3)',
+    borderColor: '#ff1493',
+  },
+  partnerBubble: {
+    backgroundColor: 'rgba(139, 92, 246, 0.3)',
+    borderColor: '#8b5cf6',
+  },
+  messageText: {
+    color: 'white',
+    fontSize: 16,
+    lineHeight: 22,
+    marginBottom: 5,
+  },
+  messageTime: {
+    color: '#d1d5db',
+    fontSize: 12,
+    textAlign: 'right',
+  },
+  inputContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 30,
+    alignItems: 'flex-end',
+    paddingHorizontal: 20,
     paddingVertical: 15,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 20, 147, 0.3)',
     gap: 10,
   },
-  buttonText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: 'white',
-  },
-  buttonEmoji: {
-    fontSize: 20,
-  },
-  goldenPreview: {
-    backgroundColor: 'rgba(251, 191, 36, 0.2)',
+  textInput: {
+    flex: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 20,
-    padding: 20,
-    borderWidth: 2,
-    borderColor: '#fcd34d',
-    alignItems: 'center',
-    shadowColor: '#fcd34d',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.5,
-    shadowRadius: 15,
-    elevation: 8,
-  },
-  goldenTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#fcd34d',
-    marginBottom: 8,
-    textShadowColor: '#d97706',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 5,
-  },
-  goldenText: {
+    paddingHorizontal: 15,
+    paddingVertical: 12,
+    color: 'white',
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#fbbf24',
-    textShadowColor: '#d97706',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 5,
+    maxHeight: 100,
+    borderWidth: 1,
+    borderColor: '#374151',
+  },
+  sendButton: {
+    borderRadius: 25,
+    overflow: 'hidden',
+  },
+  sendButtonDisabled: {
+    opacity: 0.5,
+  },
+  sendButtonGradient: {
+    width: 50,
+    height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  sendButtonText: {
+    fontSize: 20,
   },
 });
 
-export default HomeScreen;
+export default ChatScreen;
