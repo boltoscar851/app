@@ -4,4 +4,7 @@ export type RootStackParamList = {
   Profile: undefined;
   Auth: undefined;
   HomeTab: undefined;
+  Chat: undefined;
+  Diary: undefined;
+  Calendar: undefined;
 };

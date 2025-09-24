@@ -12,6 +12,9 @@ import RulesScreen from './src/screens/RulesScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import AuthScreen from './src/screens/AuthScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
+import ChatScreen from './src/screens/ChatScreen';
+import DiaryScreen from './src/screens/DiaryScreen';
+import CalendarScreen from './src/screens/CalendarScreen';
 import { RootStackParamList } from './src/types/navigation';
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -41,6 +44,36 @@ function AuthenticatedApp() {
           title: 'Inicio',
           tabBarIcon: ({ color, size }) => (
             <Text style={{ color, fontSize: size }}>🏠</Text>
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Chat"
+        component={ChatScreen}
+        options={{
+          title: 'Chat',
+          tabBarIcon: ({ color, size }) => (
+            <Text style={{ color, fontSize: size }}>💬</Text>
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Diary"
+        component={DiaryScreen}
+        options={{
+          title: 'Diario',
+          tabBarIcon: ({ color, size }) => (
+            <Text style={{ color, fontSize: size }}>📖</Text>
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Calendar"
+        component={CalendarScreen}
+        options={{
+          title: 'Eventos',
+          tabBarIcon: ({ color, size }) => (
+            <Text style={{ color, fontSize: size }}>📅</Text>
           ),
         }}
       />

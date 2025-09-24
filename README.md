@@ -132,15 +132,15 @@ src/
 - [x] Efectos visuales y animaciones
 
 ### Fase 2 - Funcionalidades Básicas
-- [ ] Sistema de autenticación para parejas
-- [ ] Perfil de usuario personalizable
-- [ ] Configuración de la aplicación
+- [x] Sistema de autenticación para parejas
+- [x] Perfil de usuario personalizable
+- [x] Configuración de la aplicación
 
-### Fase 3 - Herramientas de Conexión
-- [ ] Chat privado
-- [ ] Diario de pareja
-- [ ] Galería colaborativa
-- [ ] Calendario de eventos
+### Fase 3 - Herramientas de Conexión ✅
+- [x] Chat privado con mensajes en tiempo real
+- [x] Diario de pareja con estados de ánimo
+- [x] Calendario de eventos especiales
+- [ ] Galería colaborativa (próximamente)
 
 ### Fase 4 - Actividades y Juegos
 - [ ] Ruleta de actividades

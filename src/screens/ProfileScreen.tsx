@@ -49,8 +49,14 @@ const ProfileScreen: React.FC = () => {
   const handleSaveProfile = async () => {
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      // Aquí implementarías la actualización del perfil
-      // Por ahora solo simulamos
+      
+      if (!user) return;
+      
+      await authService.updateUserProfile(user.id, {
+        display_name: displayName,
+      });
+      
+      await refreshProfile();
       setIsEditing(false);
       Alert.alert('Éxito', 'Perfil actualizado correctamente');
     } catch (error: any) {
