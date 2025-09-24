@@ -14,7 +14,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import { useAuth } from '../contexts/AuthContext';
-import { authService } from '../lib/supabase';
+import { authService, PremiumTheme, CoupleSettings } from '../lib/supabase';
 import FloatingHearts from '../components/FloatingHearts';
 import SparkleEffects from '../components/SparkleEffects';
 
@@ -24,6 +24,77 @@ const ProfileScreen: React.FC = () => {
   const { user, userProfile, couple, signOut, refreshProfile } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [displayName, setDisplayName] = useState(userProfile?.display_name || '');
+  const [showPremium, setShowPremium] = useState(false);
+  const [showThemes, setShowThemes] = useState(false);
+  const [premiumCode, setPremiumCode] = useState('');
+  const [premiumStatus, setPremiumStatus] = useState<any>(null);
+  const [themes, setThemes] = useState<PremiumTheme[]>([]);
+  const [coupleSettings, setCoupleSettings] = useState<CoupleSettings | null>(null);
+
+  useEffect(() => {
+    if (couple?.id) {
+      loadPremiumData();
+    }
+  }, [couple?.id]);
+
+  const loadPremiumData = async () => {
+    if (!couple?.id) return;
+    
+    try {
+      const [status, themesData, settings] = await Promise.all([
+        authService.getPremiumStatus(couple.id),
+        authService.getPremiumThemes(),
+        authService.getCoupleSettings(couple.id),
+      ]);
+      
+      setPremiumStatus(status);
+      setThemes(themesData);
+      setCoupleSettings(settings);
+    } catch (error) {
+      console.error('Error loading premium data:', error);
+    }
+  };
+
+  const activatePremiumCode = async () => {
+    if (!premiumCode.trim() || !couple?.id) {
+      Alert.alert('Error', 'Por favor ingresa un código válido');
+      return;
+    }
+
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      const result = await authService.activatePremiumCode(couple.id, premiumCode.trim());
+      
+      if (result.success) {
+        Alert.alert('¡Éxito!', result.message);
+        setPremiumCode('');
+        setShowPremium(false);
+        loadPremiumData();
+        refreshProfile();
+      } else {
+        Alert.alert('Error', result.message);
+      }
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Error al activar el código');
+    }
+  };
+
+  const selectTheme = async (themeId: string) => {
+    if (!couple?.id) return;
+    
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      await authService.updateCoupleSettings(couple.id, {
+        theme_id: themeId,
+      });
+      
+      setShowThemes(false);
+      loadPremiumData();
+      Alert.alert('¡Tema aplicado!', 'El nuevo tema se ha aplicado correctamente');
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Error al cambiar el tema');
+    }
+  };
 
   const handleSignOut = () => {
     Alert.alert(

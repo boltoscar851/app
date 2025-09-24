@@ -102,6 +102,47 @@ export type WishlistItem = {
   created_at: string;
 };
 
+export type PremiumCode = {
+  id: string;
+  code: string;
+  type: string;
+  benefits: any;
+  is_active: boolean;
+  expires_at: string | null;
+  created_at: string;
+};
+
+export type PremiumFeature = {
+  id: string;
+  couple_id: string;
+  feature_name: string;
+  is_enabled: boolean;
+  activated_at: string;
+  expires_at: string | null;
+  created_at: string;
+};
+
+export type PremiumTheme = {
+  id: string;
+  name: string;
+  display_name: string;
+  colors: any;
+  is_premium: boolean;
+  preview_url: string | null;
+  created_at: string;
+};
+
+export type CoupleSettings = {
+  id: string;
+  couple_id: string;
+  theme_id: string | null;
+  notifications_enabled: boolean;
+  privacy_level: string;
+  custom_settings: any;
+  created_at: string;
+  updated_at: string;
+};
+
 // Funciones de autenticación
 export const authService = {
   // Registrar nueva pareja
@@ -619,5 +660,63 @@ export const authService = {
         callback
       )
       .subscribe();
+  },
+
+  // Servicios Premium
+  async activatePremiumCode(coupleId: string, code: string) {
+    const { data, error } = await supabase.rpc('activate_premium_code', {
+      p_couple_id: coupleId,
+      p_code: code,
+    });
+
+    if (error) throw error;
+    return data;
+  },
+
+  async getPremiumStatus(coupleId: string) {
+    const { data, error } = await supabase.rpc('get_couple_premium_status', {
+      p_couple_id: coupleId,
+    });
+
+    if (error) throw error;
+    return data;
+  },
+
+  async getPremiumThemes() {
+    const { data, error } = await supabase
+      .from('premium_themes')
+      .select('*')
+      .order('is_premium', { ascending: true });
+
+    if (error) throw error;
+    return data;
+  },
+
+  async getCoupleSettings(coupleId: string) {
+    const { data, error } = await supabase
+      .from('couple_settings')
+      .select(`
+        *,
+        premium_themes (*)
+      `)
+      .eq('couple_id', coupleId)
+      .single();
+
+    if (error && error.code !== 'PGRST116') throw error;
+    return data;
+  },
+
+  async updateCoupleSettings(coupleId: string, settings: Partial<CoupleSettings>) {
+    const { data, error } = await supabase
+      .from('couple_settings')
+      .upsert({
+        couple_id: coupleId,
+        ...settings,
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
   },
 };
