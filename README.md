@@ -43,6 +43,8 @@ Una aplicación móvil privada desarrollada con React Native y Expo que permite 
 - **Expo Blur** - Efectos de desenfoque
 - **Expo Haptics** - Retroalimentación táctil
 - **React Native Reanimated** - Animaciones avanzadas
+- **Supabase** - Base de datos y autenticación
+- **PostgreSQL** - Base de datos relacional
 
 ## 📦 Instalación y Configuración
 
@@ -51,6 +53,7 @@ Una aplicación móvil privada desarrollada con React Native y Expo que permite 
 - npm o yarn
 - Expo CLI
 - EAS CLI (para builds de producción)
+- Cuenta de Supabase
 
 ### Instalación
 ```bash
@@ -62,6 +65,16 @@ npm install -g @expo/cli
 
 # Instalar EAS CLI globalmente (para builds)
 npm install -g eas-cli
+```
+
+### Configuración de Supabase
+```bash
+# Copiar el archivo de configuración
+cp .env.example .env
+
+# Editar .env con tus credenciales de Supabase
+# EXPO_PUBLIC_SUPABASE_URL=tu_url_de_supabase
+# EXPO_PUBLIC_SUPABASE_ANON_KEY=tu_clave_anonima
 ```
 
 ### Desarrollo

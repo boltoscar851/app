@@ -75,6 +75,7 @@ const ActivitiesScreen: React.FC = () => {
     if (isSpinning || !couple?.id) return;
     
     setIsSpinning(true);
+    setRouletteActivity(null); // Clear previous result
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     
     // Animate the roulette
@@ -95,7 +96,7 @@ const ActivitiesScreen: React.FC = () => {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }, 2000);
     } catch (error: any) {
-      Alert.alert('Error', 'No se pudo obtener una actividad');
+      Alert.alert('Error', error.message || 'No se pudo obtener una actividad');
       setIsSpinning(false);
       spinAnimation.setValue(0);
     }

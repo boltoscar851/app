@@ -6,6 +6,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { View, Text } from 'react-native';
+import { Platform } from 'react-native';
 
 import { AuthProvider, useAuth } from './src/contexts/AuthContext';
 import RulesScreen from './src/screens/RulesScreen';
@@ -178,20 +179,16 @@ function AppContent() {
 }
 
 export default function App() {
-  const [fontsLoaded] = useFonts({
-    'Inter-Regular': require('./assets/fonts/Inter-Regular.ttf'),
-    'Inter-Bold': require('./assets/fonts/Inter-Bold.ttf'),
-  });
+  const [fontsLoaded] = useFonts({});
 
   React.useEffect(() => {
-    if (fontsLoaded) {
+    // Always hide splash screen after a short delay
+    const timer = setTimeout(() => {
       SplashScreen.hideAsync();
-    }
-  }, [fontsLoaded]);
+    }, 1000);
 
-  if (!fontsLoaded) {
-    return null;
-  }
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <AuthProvider>
