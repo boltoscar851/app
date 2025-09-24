@@ -1,66 +1,174 @@
-# Reglas de la Relación 💕
+# Nuestro Amor - App Móvil para Parejas 💕
 
-Una hermosa aplicación web que muestra las 29 reglas de una relación especial entre Oscar y Yuritzy.
+Una aplicación móvil privada desarrollada con React Native y Expo que permite a las parejas fortalecer su vínculo afectivo a través de reglas compartidas, actividades interactivas y herramientas de conexión.
 
-## 🌟 Características
+## 🚀 Características Principales
 
-- **Diseño Romántico**: Fondo animado con gradientes dinámicos
-- **Efectos Visuales**: Corazones flotantes y efectos de brillo
-- **Navegación Intuitiva**: Botones para navegar entre reglas
-- **Responsive**: Se adapta a todos los tamaños de pantalla
-- **Interactivo**: Grid de reglas clickeable
-- **Animaciones**: Múltiples animaciones CSS para una experiencia visual atractiva
+### 📱 Aplicación Móvil Nativa
+- Desarrollada con React Native y Expo
+- Compatible con Android e iOS
+- Interfaz moderna y romántica
+- Animaciones fluidas y efectos visuales
 
-## 🚀 Cómo usar
+### 💖 Reglas del Amor
+- 29 reglas personalizadas para la relación
+- Navegación intuitiva entre reglas
+- Barra de progreso visual
+- Regla de oro especial (#30)
 
-1. Simplemente abre el archivo `index.html` en tu navegador web
-2. ¡Disfruta explorando las 29 reglas del amor! 💕
+### 🎨 Diseño Romántico
+- Gradientes animados de fondo
+- Corazones flotantes
+- Efectos de brillo (sparkles)
+- Colores románticos (rosa, púrpura, dorado)
+- Animaciones de entrada y transiciones
 
-## 📱 Características Responsive
+### 🔮 Funcionalidades Futuras
+- Diario de pareja con fotos y videos
+- Galería colaborativa
+- Calendario de eventos importantes
+- Chat privado con stickers románticos
+- Ruleta de actividades (normal y sorpresa)
+- Retos semanales
+- Lista de deseos compartida
+- Sistema premium con códigos especiales
 
-- Diseño adaptable para móviles, tablets y desktop
-- Navegación optimizada para pantallas táctiles
-- Texto y elementos escalables
+## 🛠️ Tecnologías Utilizadas
 
-## 🎨 Efectos Visuales
+- **React Native** - Framework principal
+- **Expo** - Plataforma de desarrollo
+- **TypeScript** - Tipado estático
+- **React Navigation** - Navegación entre pantallas
+- **Expo Linear Gradient** - Gradientes
+- **Expo Blur** - Efectos de desenfoque
+- **Expo Haptics** - Retroalimentación táctil
+- **React Native Reanimated** - Animaciones avanzadas
 
-- Fondo con gradiente animado
-- Corazones flotantes con animación de rebote
-- Efectos de brillo (sparkles) pulsantes
-- Barra de progreso animada
-- Transiciones suaves en todos los elementos
+## 📦 Instalación y Configuración
 
-## 🔧 Instalación y Uso
+### Prerrequisitos
+- Node.js (v16 o superior)
+- npm o yarn
+- Expo CLI
+- EAS CLI (para builds de producción)
 
-1. Clona o descarga este repositorio
-2. Abre `index.html` en tu navegador web
-3. ¡Disfruta navegando por las reglas!
+### Instalación
+```bash
+# Instalar dependencias
+npm install
 
-## 📂 Estructura del Proyecto
+# Instalar Expo CLI globalmente (si no lo tienes)
+npm install -g @expo/cli
+
+# Instalar EAS CLI globalmente (para builds)
+npm install -g eas-cli
+```
+
+### Desarrollo
+```bash
+# Iniciar el servidor de desarrollo
+npm start
+
+# Ejecutar en Android
+npm run android
+
+# Ejecutar en iOS
+npm run ios
+
+# Ejecutar en web
+npm run web
+```
+
+## 🏗️ Build y Distribución
+
+### Configurar EAS Build
+```bash
+# Inicializar EAS en el proyecto
+eas build:configure
+
+# Login en Expo
+eas login
+```
+
+### Generar APK para Android
+```bash
+# Build de preview (APK)
+eas build --platform android --profile preview
+
+# Build de producción
+eas build --platform android --profile production
+```
+
+### Build para iOS
+```bash
+# Build para iOS
+eas build --platform ios --profile production
+```
+
+## 📱 Estructura del Proyecto
 
 ```
-├── index.html          # Página principal
-├── styles.css          # Estilos CSS
-├── script.js           # Lógica JavaScript
-├── README.md           # Este archivo
-└── public/             # Imágenes de los avatares
-    ├── Imagen de WhatsApp 2025-09-06 a las 00.43.59_37264b21.jpg
-    └── Imagen de WhatsApp 2025-09-06 a las 00.47.51_d31d39ee.jpg
+src/
+├── components/          # Componentes reutilizables
+│   ├── FloatingHearts.tsx
+│   ├── SparkleEffects.tsx
+│   ├── RuleCard.tsx
+│   └── ProgressBar.tsx
+├── screens/            # Pantallas principales
+│   ├── HomeScreen.tsx
+│   └── RulesScreen.tsx
+├── data/               # Datos de la aplicación
+│   └── rules.ts
+└── types/              # Tipos TypeScript
+    └── navigation.ts
 ```
 
-## 🌐 Despliegue en GitHub Pages
+## 🎯 Roadmap de Desarrollo
 
-Este proyecto está optimizado para GitHub Pages:
+### Fase 1 - Reglas del Amor ✅
+- [x] Pantalla de inicio romántica
+- [x] Visualización de reglas
+- [x] Navegación entre reglas
+- [x] Efectos visuales y animaciones
 
-1. Sube los archivos a tu repositorio de GitHub
-2. Ve a Settings > Pages
-3. Selecciona la rama main como fuente
-4. Tu sitio estará disponible en `https://tu-usuario.github.io/nombre-repositorio`
+### Fase 2 - Funcionalidades Básicas
+- [ ] Sistema de autenticación para parejas
+- [ ] Perfil de usuario personalizable
+- [ ] Configuración de la aplicación
 
-## 💝 Regla de Oro
+### Fase 3 - Herramientas de Conexión
+- [ ] Chat privado
+- [ ] Diario de pareja
+- [ ] Galería colaborativa
+- [ ] Calendario de eventos
 
-**Regla #30**: Amarnos por siempre 💗🤍
+### Fase 4 - Actividades y Juegos
+- [ ] Ruleta de actividades
+- [ ] Retos semanales
+- [ ] Preguntas del día
+- [ ] Lista de deseos compartida
+
+### Fase 5 - Sistema Premium
+- [ ] Códigos premium
+- [ ] Funcionalidades exclusivas
+- [ ] Temas personalizables
+- [ ] Almacenamiento en la nube
+
+## 🔐 Seguridad y Privacidad
+
+- Cifrado extremo a extremo para datos sensibles
+- Almacenamiento local seguro
+- Sin recopilación de datos innecesarios
+- Privacidad total entre parejas
+
+## 📄 Licencia
+
+Este proyecto es privado y está destinado exclusivamente para uso personal de Oscar y Yuritzy.
+
+## 💕 Créditos
+
+Desarrollado con amor para Oscar y Yuritzy 💖
 
 ---
 
-Hecho con 💕 para Oscar y Yuritzy
+**Regla de Oro (#30)**: Amarnos por siempre 💗🤍
