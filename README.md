@@ -4,34 +4,89 @@ Una aplicación móvil privada desarrollada con React Native y Expo que permite 
 
 ## 🚀 Características Principales
 
+## 🚀 Características Principales
+
 ### 📱 Aplicación Móvil Nativa
-- Desarrollada con React Native y Expo
-- Compatible con Android e iOS
-- Interfaz moderna y romántica
-- Animaciones fluidas y efectos visuales
+
+- Desarrollada con **React Native** y **Expo**
+- Compatible con **Android** e **iOS**
+- Interfaz moderna, romántica y **responsive**
+- Animaciones fluidas, gradientes dinámicos y efectos visuales
 
 ### 💖 Reglas del Amor
+
 - 29 reglas personalizadas para la relación
-- Navegación intuitiva entre reglas
-- Barra de progreso visual
+- Navegación intuitiva entre reglas con barra de progreso visual
 - Regla de oro especial (#30)
 
+### 🎯 Widgets Agregados
+
+- **DaysTogetherWidget** – Contador de días juntos  
+- **NextEventWidget** – Próximo evento importante con cuenta regresiva  
+- **MessagesWidget** – Estadísticas de mensajes enviados  
+- **PhotosWidget** – Contador de fotos compartidas  
+- **DistanceWidget** – Distancia actual entre la pareja  
+- **ActivitiesWidget** – Actividades completadas vs pendientes  
+- **DiaryWidget** – Últimas entradas del diario y actividad reciente  
+- **WishlistWidget** – Progreso de deseos cumplidos  
+
+### 🎮 Funcionalidades Nuevas
+
+- **Chat Mejorado**  
+  - Notas de voz con grabación y reproducción  
+  - Stickers románticos por categorías (Amor, Felicidad, Animales, etc.)  
+  - Reproductor de voz con barra de progreso  
+  - Interfaz mejorada con múltiples opciones de envío  
+
+- **Ruleta Sorpresa**  
+  - Modal de sorpresas secretas: solo quien gira ve el resultado  
+  - Notificación misteriosa para la pareja con el resultado  
+  - Animaciones especiales con emojis giratorios  
+
+- **Pantalla Principal Renovada**  
+  - Grid de widgets interactivos con datos en tiempo real  
+  - Widget principal destacado (días juntos)  
+  - Widgets secundarios en cuadrícula 2x2  
+  - Acciones rápidas reorganizadas  
+  - Widget de sorpresa integrado  
+
 ### 🎨 Diseño Romántico
-- Gradientes animados de fondo
-- Corazones flotantes
-- Efectos de brillo (sparkles)
-- Colores románticos (rosa, púrpura, dorado)
-- Animaciones de entrada y transiciones
+
+- Gradientes animados de fondo  
+- Corazones flotantes y efectos de brillo (sparkles)  
+- Colores románticos (rosa, púrpura, dorado)  
+- Animaciones de entrada y transiciones suaves  
+
+---
 
 ### 🔮 Funcionalidades Futuras
-- Diario de pareja con fotos y videos
-- Galería colaborativa
-- Calendario de eventos importantes
-- Chat privado con stickers románticos
-- Ruleta de actividades (normal y sorpresa)
-- Retos semanales
-- Lista de deseos compartida
-- Sistema premium con códigos especiales
+
+- Diario de pareja con fotos y videos  
+- Galería colaborativa  
+- Calendario de eventos importantes  
+- Chat privado con stickers románticos  
+- Ruleta de actividades (normal y sorpresa)  
+- Retos semanales  
+- Lista de deseos compartida  
+- Sistema premium con códigos especiales  
+
+---
+
+## 🔧 Mejoras Técnicas
+
+- Gestión de permisos para micrófono y ubicación  
+- Componentes reutilizables para widgets  
+- Integración con **Supabase** para datos en tiempo real  
+- Animaciones fluidas y efectos visuales optimizados  
+- Diseño adaptable a diferentes tamaños de pantalla  
+
+## 📱 Experiencia de Usuario
+
+- Interfaz más rica y dinámica  
+- Feedback háptico en todas las interacciones  
+- Actualización automática de datos en tiempo real  
+- Navegación intuitiva entre funcionalidades  
+- Personalización visual con gradientes y efectos  
 
 ## 🛠️ Tecnologías Utilizadas
 
