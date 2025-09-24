@@ -80,6 +80,51 @@ const HomeScreen: React.FC = () => {
       <Animated.View
         style={[
           styles.content,
+      {/* Quick Actions */}
+      <View style={styles.quickActions}>
+        <TouchableOpacity
+          style={styles.quickActionButton}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            navigation.navigate('DailyQuestions' as never);
+          }}
+          activeOpacity={0.8}
+        >
+          <BlurView intensity={20} style={styles.quickActionBlur}>
+            <Text style={styles.quickActionEmoji}>❓</Text>
+            <Text style={styles.quickActionText}>Pregunta del Día</Text>
+          </BlurView>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.quickActionButton}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            navigation.navigate('Counters' as never);
+          }}
+          activeOpacity={0.8}
+        >
+          <BlurView intensity={20} style={styles.quickActionBlur}>
+            <Text style={styles.quickActionEmoji}>📊</Text>
+            <Text style={styles.quickActionText}>Contadores</Text>
+          </BlurView>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.quickActionButton}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            navigation.navigate('Activities' as never);
+          }}
+          activeOpacity={0.8}
+        >
+          <BlurView intensity={20} style={styles.quickActionBlur}>
+            <Text style={styles.quickActionEmoji}>🎯</Text>
+            <Text style={styles.quickActionText}>Actividades</Text>
+          </BlurView>
+        </TouchableOpacity>
+      </View>
+
           {
             opacity: fadeAnim,
             transform: [{ scale: scaleAnim }],
@@ -246,6 +291,36 @@ const styles = StyleSheet.create({
     textShadowColor: '#ff1493',
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 10,
+  },
+  quickActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 30,
+    paddingHorizontal: 10,
+  },
+  quickActionButton: {
+    flex: 1,
+    marginHorizontal: 5,
+    borderRadius: 15,
+    overflow: 'hidden',
+  },
+  quickActionBlur: {
+    backgroundColor: 'rgba(255, 20, 147, 0.2)',
+    borderRadius: 15,
+    padding: 15,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#ff1493',
+  },
+  quickActionEmoji: {
+    fontSize: 24,
+    marginBottom: 8,
+  },
+  quickActionText: {
+    color: '#ff69b4',
+    fontSize: 12,
+    fontWeight: '600',
+    textAlign: 'center',
   },
   enterButton: {
     marginBottom: 40,

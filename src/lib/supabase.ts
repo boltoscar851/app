@@ -102,6 +102,35 @@ export type WishlistItem = {
   created_at: string;
 };
 
+export type GalleryItem = {
+  id: string;
+  couple_id: string;
+  uploaded_by: string;
+  title: string;
+  url: string;
+  type: 'photo' | 'video';
+  folder: string;
+  is_favorite: boolean;
+  created_at: string;
+};
+
+export type DailyQuestion = {
+  id: string;
+  question: string;
+  date: string;
+  is_active: boolean;
+  created_at: string;
+};
+
+export type DailyQuestionAnswer = {
+  id: string;
+  question_id: string;
+  couple_id: string;
+  user_id: string;
+  answer: string;
+  created_at: string;
+};
+
 export type PremiumCode = {
   id: string;
   code: string;
@@ -643,6 +672,138 @@ export const authService = {
       .eq('id', itemId);
 
     if (error) throw error;
+  },
+
+  // Servicios de Galería
+  async getGalleryItems(coupleId: string, folder?: string) {
+    let query = supabase
+      .from('gallery_items')
+      .select('*')
+      .eq('couple_id', coupleId)
+      .order('created_at', { ascending: false });
+
+    if (folder && folder !== 'all') {
+      query = query.eq('folder', folder);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+    return data;
+  },
+
+  async uploadGalleryItem(
+    coupleId: string,
+    uploadedBy: string,
+    title: string,
+    url: string,
+    type: 'photo' | 'video',
+    folder: string
+  ) {
+    const { data, error } = await supabase
+      .from('gallery_items')
+      .insert({
+        couple_id: coupleId,
+        uploaded_by: uploadedBy,
+        title,
+        url,
+        type,
+        folder,
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async toggleGalleryFavorite(itemId: string, isFavorite: boolean) {
+    const { data, error } = await supabase
+      .from('gallery_items')
+      .update({ is_favorite: isFavorite })
+      .eq('id', itemId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async deleteGalleryItem(itemId: string) {
+    const { error } = await supabase
+      .from('gallery_items')
+      .delete()
+      .eq('id', itemId);
+
+    if (error) throw error;
+  },
+
+  // Servicios de Preguntas Diarias
+  async getTodayQuestion() {
+    const today = new Date().toISOString().split('T')[0];
+    
+    const { data, error } = await supabase
+      .from('daily_questions')
+      .select('*')
+      .eq('date', today)
+      .eq('is_active', true)
+      .single();
+
+    if (error && error.code !== 'PGRST116') throw error;
+    return data;
+  },
+
+  async getQuestionAnswers(questionId: string, coupleId: string) {
+    const { data, error } = await supabase
+      .from('daily_question_answers')
+      .select('*')
+      .eq('question_id', questionId)
+      .eq('couple_id', coupleId);
+
+    if (error) throw error;
+    return data;
+  },
+
+  async submitQuestionAnswer(
+    questionId: string,
+    coupleId: string,
+    userId: string,
+    answer: string
+  ) {
+    const { data, error } = await supabase
+      .from('daily_question_answers')
+      .upsert({
+        question_id: questionId,
+        couple_id: coupleId,
+        user_id: userId,
+        answer,
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async getPreviousQuestions(coupleId: string, limit: number = 10) {
+    const today = new Date().toISOString().split('T')[0];
+    
+    const { data, error } = await supabase
+      .from('daily_questions')
+      .select(`
+        *,
+        daily_question_answers!inner (
+          user_id,
+          answer,
+          created_at
+        )
+      `)
+      .lt('date', today)
+      .eq('daily_question_answers.couple_id', coupleId)
+      .order('date', { ascending: false })
+      .limit(limit);
+
+    if (error) throw error;
+    return data;
   },
 
   // Suscripciones en tiempo real

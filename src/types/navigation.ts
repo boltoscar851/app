@@ -11,4 +11,7 @@ export type RootStackParamList = {
   ActivitiesMain: undefined;
   Challenges: undefined;
   Wishlist: undefined;
+  Gallery: undefined;
+  DailyQuestions: undefined;
+  Counters: undefined;
 };

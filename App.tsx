@@ -19,6 +19,9 @@ import CalendarScreen from './src/screens/CalendarScreen';
 import ActivitiesScreen from './src/screens/ActivitiesScreen';
 import ChallengesScreen from './src/screens/ChallengesScreen';
 import WishlistScreen from './src/screens/WishlistScreen';
+import GalleryScreen from './src/screens/GalleryScreen';
+import DailyQuestionsScreen from './src/screens/DailyQuestionsScreen';
+import CountersScreen from './src/screens/CountersScreen';
 import { RootStackParamList } from './src/types/navigation';
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -62,6 +65,16 @@ function AuthenticatedApp() {
         }}
       />
       <Tab.Screen
+        name="Gallery"
+        component={GalleryScreen}
+        options={{
+          title: 'Galería',
+          tabBarIcon: ({ color, size }) => (
+            <Text style={{ color, fontSize: size }}>📸</Text>
+          ),
+        }}
+      />
+      <Tab.Screen
         name="Diary"
         component={DiaryScreen}
         options={{
@@ -78,16 +91,6 @@ function AuthenticatedApp() {
           title: 'Eventos',
           tabBarIcon: ({ color, size }) => (
             <Text style={{ color, fontSize: size }}>📅</Text>
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Activities"
-        component={ActivitiesStackNavigator}
-        options={{
-          title: 'Actividades',
-          tabBarIcon: ({ color, size }) => (
-            <Text style={{ color, fontSize: size }}>🎯</Text>
           ),
         }}
       />
@@ -130,6 +133,9 @@ function HomeStackNavigator() {
     >
       <Stack.Screen name="Home" component={HomeScreen} />
       <Stack.Screen name="Rules" component={RulesScreen} />
+      <Stack.Screen name="DailyQuestions" component={DailyQuestionsScreen} />
+      <Stack.Screen name="Counters" component={CountersScreen} />
+      <Stack.Screen name="Activities" component={ActivitiesStackNavigator} />
     </Stack.Navigator>
   );
 }
