@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -32,6 +31,7 @@ const ProfileScreen: React.FC = () => {
   const [premiumStatus, setPremiumStatus] = useState<any>(null);
   const [themes, setThemes] = useState<PremiumTheme[]>([]);
   const [coupleSettings, setCoupleSettings] = useState<CoupleSettings | null>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (couple?.id) {
@@ -63,6 +63,7 @@ const ProfileScreen: React.FC = () => {
       return;
     }
 
+    setLoading(true);
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       const result = await authService.activatePremiumCode(couple.id, premiumCode.trim());
@@ -78,6 +79,8 @@ const ProfileScreen: React.FC = () => {
       }
     } catch (error: any) {
       Alert.alert('Error', error.message || 'Error al activar el código');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -138,6 +141,9 @@ const ProfileScreen: React.FC = () => {
     }
   };
 
+  const isPremium = premiumStatus?.is_premium || false;
+  const premiumFeatures = premiumStatus?.features || {};
+
   return (
     <LinearGradient
       colors={['#000000', '#1a0033', '#330066', '#1a0033', '#000000']}
@@ -163,6 +169,11 @@ const ProfileScreen: React.FC = () => {
                   {userProfile?.display_name?.charAt(0)?.toUpperCase() || '?'}
                 </Text>
               </View>
+              {isPremium && (
+                <View style={styles.premiumBadge}>
+                  <Text style={styles.premiumBadgeText}>👑 PREMIUM</Text>
+                </View>
+              )}
             </View>
 
             <View style={styles.profileInfo}>
@@ -235,6 +246,85 @@ const ProfileScreen: React.FC = () => {
             </View>
           </BlurView>
 
+          {/* Premium Status Card */}
+          <BlurView intensity={20} style={[
+            styles.premiumCard,
+            isPremium ? styles.premiumCardActive : styles.premiumCardInactive
+          ]}>
+            <View style={styles.premiumHeader}>
+              <Text style={styles.premiumTitle}>
+                {isPremium ? '👑 Estado Premium' : '💎 Hazte Premium'}
+              </Text>
+              {!isPremium && (
+                <TouchableOpacity
+                  style={styles.activateButton}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    setShowPremium(true);
+                  }}
+                  activeOpacity={0.8}
+                >
+                  <LinearGradient
+                    colors={['#fbbf24', '#f59e0b']}
+                    style={styles.activateButtonGradient}
+                  >
+                    <Text style={styles.activateButtonText}>Activar Código</Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+              )}
+            </View>
+
+            {isPremium ? (
+              <View style={styles.premiumFeatures}>
+                <Text style={styles.premiumStatusText}>¡Tienes acceso premium! 🎉</Text>
+                
+                <View style={styles.featuresList}>
+                  {premiumFeatures.custom_rules?.enabled && (
+                    <View style={styles.featureItem}>
+                      <Text style={styles.featureIcon}>📝</Text>
+                      <Text style={styles.featureText}>Reglas personalizadas</Text>
+                    </View>
+                  )}
+                  {premiumFeatures.premium_themes?.enabled && (
+                    <View style={styles.featureItem}>
+                      <Text style={styles.featureIcon}>🎨</Text>
+                      <Text style={styles.featureText}>Temas premium</Text>
+                    </View>
+                  )}
+                  {premiumFeatures.advanced_activities?.enabled && (
+                    <View style={styles.featureItem}>
+                      <Text style={styles.featureIcon}>🎯</Text>
+                      <Text style={styles.featureText}>Actividades avanzadas</Text>
+                    </View>
+                  )}
+                  {premiumFeatures.unlimited_storage?.enabled && (
+                    <View style={styles.featureItem}>
+                      <Text style={styles.featureIcon}>☁️</Text>
+                      <Text style={styles.featureText}>Almacenamiento ilimitado</Text>
+                    </View>
+                  )}
+                </View>
+
+                {premiumStatus?.expires_at && (
+                  <Text style={styles.expirationText}>
+                    Expira: {new Date(premiumStatus.expires_at).toLocaleDateString('es-ES')}
+                  </Text>
+                )}
+              </View>
+            ) : (
+              <View style={styles.premiumBenefits}>
+                <Text style={styles.benefitsTitle}>Beneficios Premium:</Text>
+                <View style={styles.benefitsList}>
+                  <Text style={styles.benefitItem}>📝 Reglas personalizadas</Text>
+                  <Text style={styles.benefitItem}>🎨 Temas exclusivos</Text>
+                  <Text style={styles.benefitItem}>🎯 Actividades avanzadas</Text>
+                  <Text style={styles.benefitItem}>☁️ Almacenamiento ilimitado</Text>
+                  <Text style={styles.benefitItem}>💫 Funciones especiales</Text>
+                </View>
+              </View>
+            )}
+          </BlurView>
+
           {/* Couple Info Card */}
           {couple && (
             <BlurView intensity={20} style={styles.coupleCard}>
@@ -292,11 +382,11 @@ const ProfileScreen: React.FC = () => {
               style={styles.settingItem}
               onPress={() => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                Alert.alert('Próximamente', 'Esta función estará disponible pronto');
+                setShowThemes(true);
               }}
               activeOpacity={0.7}
             >
-              <Text style={styles.settingText}>🎨 Tema</Text>
+              <Text style={styles.settingText}>🎨 Temas</Text>
               <Text style={styles.settingArrow}>→</Text>
             </TouchableOpacity>
             
@@ -327,6 +417,154 @@ const ProfileScreen: React.FC = () => {
             </LinearGradient>
           </TouchableOpacity>
         </ScrollView>
+
+        {/* Premium Code Modal */}
+        <Modal
+          visible={showPremium}
+          animationType="slide"
+          presentationStyle="pageSheet"
+        >
+          <LinearGradient
+            colors={['#000000', '#1a0033', '#330066']}
+            style={styles.modalContainer}
+          >
+            <SafeAreaView style={styles.modalSafeArea}>
+              <View style={styles.modalHeader}>
+                <TouchableOpacity
+                  onPress={() => setShowPremium(false)}
+                  style={styles.modalCancelButton}
+                >
+                  <Text style={styles.modalCancelText}>Cancelar</Text>
+                </TouchableOpacity>
+                
+                <Text style={styles.modalTitle}>👑 Activar Premium</Text>
+                
+                <View style={styles.modalHeaderSpacer} />
+              </View>
+
+              <ScrollView style={styles.modalContent}>
+                <View style={styles.premiumModalContent}>
+                  <Text style={styles.premiumModalTitle}>¡Desbloquea funciones premium!</Text>
+                  
+                  <View style={styles.premiumBenefitsModal}>
+                    <View style={styles.benefitItemModal}>
+                      <Text style={styles.benefitIconModal}>📝</Text>
+                      <Text style={styles.benefitTextModal}>Reglas personalizadas para vuestra relación</Text>
+                    </View>
+                    
+                    <View style={styles.benefitItemModal}>
+                      <Text style={styles.benefitIconModal}>🎨</Text>
+                      <Text style={styles.benefitTextModal}>Temas exclusivos y personalizables</Text>
+                    </View>
+                    
+                    <View style={styles.benefitItemModal}>
+                      <Text style={styles.benefitIconModal}>🎯</Text>
+                      <Text style={styles.benefitTextModal}>Actividades y retos avanzados</Text>
+                    </View>
+                    
+                    <View style={styles.benefitItemModal}>
+                      <Text style={styles.benefitIconModal}>☁️</Text>
+                      <Text style={styles.benefitTextModal}>Almacenamiento ilimitado de fotos</Text>
+                    </View>
+                  </View>
+
+                  <Text style={styles.codeInputLabel}>Código Premium:</Text>
+                  <TextInput
+                    style={styles.codeInput}
+                    value={premiumCode}
+                    onChangeText={setPremiumCode}
+                    placeholder="Ingresa tu código premium"
+                    placeholderTextColor="#999"
+                    autoCapitalize="characters"
+                  />
+
+                  <TouchableOpacity
+                    style={[styles.activateCodeButton, loading && styles.activateCodeButtonDisabled]}
+                    onPress={activatePremiumCode}
+                    disabled={loading || !premiumCode.trim()}
+                    activeOpacity={0.8}
+                  >
+                    <LinearGradient
+                      colors={loading ? ['#666', '#444'] : ['#fbbf24', '#f59e0b']}
+                      style={styles.activateCodeGradient}
+                    >
+                      <Text style={styles.activateCodeText}>
+                        {loading ? '⏳ Activando...' : '✨ Activar Premium'}
+                      </Text>
+                    </LinearGradient>
+                  </TouchableOpacity>
+                </View>
+              </ScrollView>
+            </SafeAreaView>
+          </LinearGradient>
+        </Modal>
+
+        {/* Themes Modal */}
+        <Modal
+          visible={showThemes}
+          animationType="slide"
+          presentationStyle="pageSheet"
+        >
+          <LinearGradient
+            colors={['#000000', '#1a0033', '#330066']}
+            style={styles.modalContainer}
+          >
+            <SafeAreaView style={styles.modalSafeArea}>
+              <View style={styles.modalHeader}>
+                <TouchableOpacity
+                  onPress={() => setShowThemes(false)}
+                  style={styles.modalCancelButton}
+                >
+                  <Text style={styles.modalCancelText}>Cancelar</Text>
+                </TouchableOpacity>
+                
+                <Text style={styles.modalTitle}>🎨 Seleccionar Tema</Text>
+                
+                <View style={styles.modalHeaderSpacer} />
+              </View>
+
+              <ScrollView style={styles.modalContent}>
+                <View style={styles.themesGrid}>
+                  {themes.map((theme) => {
+                    const isSelected = coupleSettings?.theme_id === theme.id;
+                    const canUse = !theme.is_premium || isPremium;
+                    
+                    return (
+                      <TouchableOpacity
+                        key={theme.id}
+                        style={[
+                          styles.themeCard,
+                          isSelected && styles.themeCardSelected,
+                          !canUse && styles.themeCardDisabled
+                        ]}
+                        onPress={() => canUse ? selectTheme(theme.id) : Alert.alert('Premium Requerido', 'Este tema requiere una suscripción premium')}
+                        activeOpacity={0.8}
+                        disabled={!canUse}
+                      >
+                        <View style={styles.themePreview}>
+                          <LinearGradient
+                            colors={theme.colors?.gradient || ['#ff1493', '#8b008b']}
+                            style={styles.themeGradient}
+                          />
+                        </View>
+                        
+                        <View style={styles.themeInfo}>
+                          <Text style={styles.themeName}>{theme.display_name}</Text>
+                          {theme.is_premium && (
+                            <Text style={styles.themePremiumBadge}>👑 Premium</Text>
+                          )}
+                          {isSelected && (
+                            <Text style={styles.themeSelectedBadge}>✅ Seleccionado</Text>
+                          )}
+                        </View>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              </ScrollView>
+            </SafeAreaView>
+          </LinearGradient>
+        </Modal>
       </SafeAreaView>
     </LinearGradient>
   );
@@ -366,6 +604,7 @@ const styles = StyleSheet.create({
   },
   avatarContainer: {
     marginBottom: 20,
+    alignItems: 'center',
   },
   avatar: {
     width: 100,
@@ -386,6 +625,18 @@ const styles = StyleSheet.create({
     fontSize: 40,
     fontWeight: 'bold',
     color: 'white',
+  },
+  premiumBadge: {
+    backgroundColor: '#fbbf24',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 15,
+    marginTop: 8,
+  },
+  premiumBadgeText: {
+    color: '#92400e',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
   profileInfo: {
     alignItems: 'center',
@@ -476,6 +727,93 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  premiumCard: {
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 20,
+    borderWidth: 2,
+  },
+  premiumCardActive: {
+    backgroundColor: 'rgba(251, 191, 36, 0.2)',
+    borderColor: '#fbbf24',
+  },
+  premiumCardInactive: {
+    backgroundColor: 'rgba(107, 114, 128, 0.2)',
+    borderColor: '#6b7280',
+  },
+  premiumHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  premiumTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#fbbf24',
+  },
+  activateButton: {
+    borderRadius: 20,
+    overflow: 'hidden',
+  },
+  activateButtonGradient: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  activateButtonText: {
+    color: '#92400e',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  premiumFeatures: {
+    alignItems: 'center',
+  },
+  premiumStatusText: {
+    fontSize: 16,
+    color: '#10b981',
+    fontWeight: 'bold',
+    marginBottom: 15,
+  },
+  featuresList: {
+    width: '100%',
+    gap: 8,
+  },
+  featureItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  featureIcon: {
+    fontSize: 20,
+  },
+  featureText: {
+    fontSize: 16,
+    color: 'white',
+    fontWeight: '500',
+  },
+  expirationText: {
+    fontSize: 14,
+    color: '#d1d5db',
+    marginTop: 15,
+    textAlign: 'center',
+  },
+  premiumBenefits: {
+    alignItems: 'center',
+  },
+  benefitsTitle: {
+    fontSize: 16,
+    color: '#d1d5db',
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  benefitsList: {
+    gap: 5,
+  },
+  benefitItem: {
+    fontSize: 14,
+    color: '#d1d5db',
+    textAlign: 'center',
+  },
   coupleCard: {
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
     borderRadius: 20,
@@ -552,6 +890,155 @@ const styles = StyleSheet.create({
   signOutText: {
     color: 'white',
     fontSize: 18,
+    fontWeight: 'bold',
+  },
+  modalContainer: {
+    flex: 1,
+  },
+  modalSafeArea: {
+    flex: 1,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 20, 147, 0.3)',
+  },
+  modalCancelButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  modalCancelText: {
+    color: '#ff69b4',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#ff69b4',
+  },
+  modalHeaderSpacer: {
+    width: 80,
+  },
+  modalContent: {
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+  },
+  premiumModalContent: {
+    alignItems: 'center',
+  },
+  premiumModalTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#fbbf24',
+    textAlign: 'center',
+    marginBottom: 30,
+  },
+  premiumBenefitsModal: {
+    width: '100%',
+    marginBottom: 30,
+    gap: 15,
+  },
+  benefitItemModal: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 15,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    padding: 15,
+    borderRadius: 12,
+  },
+  benefitIconModal: {
+    fontSize: 24,
+  },
+  benefitTextModal: {
+    fontSize: 16,
+    color: 'white',
+    flex: 1,
+  },
+  codeInputLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#ff69b4',
+    marginBottom: 10,
+    alignSelf: 'flex-start',
+  },
+  codeInput: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 12,
+    padding: 15,
+    color: 'white',
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: '#374151',
+    width: '100%',
+    marginBottom: 30,
+    textAlign: 'center',
+  },
+  activateCodeButton: {
+    borderRadius: 25,
+    overflow: 'hidden',
+    width: '100%',
+  },
+  activateCodeButtonDisabled: {
+    opacity: 0.7,
+  },
+  activateCodeGradient: {
+    paddingVertical: 15,
+    alignItems: 'center',
+  },
+  activateCodeText: {
+    color: '#92400e',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  themesGrid: {
+    gap: 15,
+  },
+  themeCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 15,
+    padding: 15,
+    borderWidth: 2,
+    borderColor: '#374151',
+  },
+  themeCardSelected: {
+    borderColor: '#10b981',
+    backgroundColor: 'rgba(16, 185, 129, 0.2)',
+  },
+  themeCardDisabled: {
+    opacity: 0.5,
+  },
+  themePreview: {
+    height: 60,
+    borderRadius: 10,
+    overflow: 'hidden',
+    marginBottom: 10,
+  },
+  themeGradient: {
+    flex: 1,
+  },
+  themeInfo: {
+    alignItems: 'center',
+  },
+  themeName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: 'white',
+    marginBottom: 5,
+  },
+  themePremiumBadge: {
+    fontSize: 12,
+    color: '#fbbf24',
+    fontWeight: 'bold',
+  },
+  themeSelectedBadge: {
+    fontSize: 12,
+    color: '#10b981',
     fontWeight: 'bold',
   },
 });
