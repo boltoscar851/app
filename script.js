@@ -26,7 +26,9 @@ const rules = [
     "Cuando haya celos o incomodidad, hablarlo de inmediato sin ocultar nada.",
     "Priorizar tiempo juntos antes que tiempo con otras personas.",
     "No usar excusas para ocultar cosas, siempre hablar con sinceridad.",
-    "No usar emojis con nadie ni registrar a nadie con emojis en el celular."
+    "No usar emojis con nadie ni registrar a nadie con emojis en el celular.",
+    "No seguir a chic@s ni reaccionar a publicaciones de ninguna red social.",
+    "No se puede hablar o hacer alusión a ningún ser femenino en caso de Oscar con excepción de \"La familia de Salo y mi mamá y familia\" y de ningún ser masculino en el caso de Yuritzy con excepción de \"Su papá y sus primos y familia\"."
 ];
 
 // Global state
@@ -207,3 +209,4 @@ function createHeartBurst() {
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', init);
+
