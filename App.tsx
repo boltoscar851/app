@@ -15,6 +15,9 @@ import ProfileScreen from './src/screens/ProfileScreen';
 import ChatScreen from './src/screens/ChatScreen';
 import DiaryScreen from './src/screens/DiaryScreen';
 import CalendarScreen from './src/screens/CalendarScreen';
+import ActivitiesScreen from './src/screens/ActivitiesScreen';
+import ChallengesScreen from './src/screens/ChallengesScreen';
+import WishlistScreen from './src/screens/WishlistScreen';
 import { RootStackParamList } from './src/types/navigation';
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -78,6 +81,16 @@ function AuthenticatedApp() {
         }}
       />
       <Tab.Screen
+        name="Activities"
+        component={ActivitiesStackNavigator}
+        options={{
+          title: 'Actividades',
+          tabBarIcon: ({ color, size }) => (
+            <Text style={{ color, fontSize: size }}>🎯</Text>
+          ),
+        }}
+      />
+      <Tab.Screen
         name="Profile"
         component={ProfileScreen}
         options={{
@@ -116,6 +129,36 @@ function HomeStackNavigator() {
     >
       <Stack.Screen name="Home" component={HomeScreen} />
       <Stack.Screen name="Rules" component={RulesScreen} />
+    </Stack.Navigator>
+  );
+}
+
+function ActivitiesStackNavigator() {
+  return (
+    <Stack.Navigator
+      initialRouteName="ActivitiesMain"
+      screenOptions={{
+        headerShown: false,
+        gestureEnabled: true,
+        cardStyleInterpolator: ({ current, layouts }) => {
+          return {
+            cardStyle: {
+              transform: [
+                {
+                  translateX: current.progress.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [layouts.screen.width, 0],
+                  }),
+                },
+              ],
+            },
+          };
+        },
+      }}
+    >
+      <Stack.Screen name="ActivitiesMain" component={ActivitiesScreen} />
+      <Stack.Screen name="Challenges" component={ChallengesScreen} />
+      <Stack.Screen name="Wishlist" component={WishlistScreen} />
     </Stack.Navigator>
   );
 }

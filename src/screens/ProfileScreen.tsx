@@ -14,6 +14,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import { useAuth } from '../contexts/AuthContext';
+import { authService } from '../lib/supabase';
 import FloatingHearts from '../components/FloatingHearts';
 import SparkleEffects from '../components/SparkleEffects';
 

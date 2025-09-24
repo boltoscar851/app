@@ -7,4 +7,8 @@ export type RootStackParamList = {
   Chat: undefined;
   Diary: undefined;
   Calendar: undefined;
+  Activities: undefined;
+  ActivitiesMain: undefined;
+  Challenges: undefined;
+  Wishlist: undefined;
 };

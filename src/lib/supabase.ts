@@ -53,6 +53,55 @@ export type Event = {
   created_at: string;
 };
 
+export type Activity = {
+  id: string;
+  title: string;
+  description: string;
+  category: 'romantic' | 'fun' | 'surprise' | 'challenge';
+  difficulty: 'easy' | 'medium' | 'hard';
+  duration: string;
+  is_surprise: boolean;
+  created_at: string;
+};
+
+export type CoupleActivity = {
+  id: string;
+  couple_id: string;
+  activity_id: string;
+  status: 'pending' | 'in_progress' | 'completed' | 'skipped';
+  completed_at: string | null;
+  rating: number | null;
+  notes: string;
+  created_at: string;
+  activities?: Activity;
+};
+
+export type WeeklyChallenge = {
+  id: string;
+  couple_id: string;
+  title: string;
+  description: string;
+  week_start: string;
+  status: 'active' | 'completed' | 'expired';
+  completed_at: string | null;
+  created_at: string;
+};
+
+export type WishlistItem = {
+  id: string;
+  couple_id: string;
+  title: string;
+  description: string;
+  category: 'travel' | 'experiences' | 'gifts' | 'goals' | 'general';
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  estimated_cost: number | null;
+  image_url: string | null;
+  is_completed: boolean;
+  completed_at: string | null;
+  added_by: string;
+  created_at: string;
+};
+
 // Funciones de autenticación
 export const authService = {
   // Registrar nueva pareja
@@ -360,6 +409,199 @@ export const authService = {
 
     if (error) throw error;
     return data;
+  },
+
+  // Servicios de Actividades
+  async getActivities() {
+    const { data, error } = await supabase
+      .from('activities')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data;
+  },
+
+  async getCoupleActivities(coupleId: string) {
+    const { data, error } = await supabase
+      .from('couple_activities')
+      .select(`
+        *,
+        activities (*)
+      `)
+      .eq('couple_id', coupleId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data;
+  },
+
+  async addActivityToCouple(coupleId: string, activityId: string) {
+    const { data, error } = await supabase
+      .from('couple_activities')
+      .insert({
+        couple_id: coupleId,
+        activity_id: activityId,
+        status: 'pending',
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async updateCoupleActivity(coupleActivityId: string, updates: Partial<CoupleActivity>) {
+    const { data, error } = await supabase
+      .from('couple_activities')
+      .update(updates)
+      .eq('id', coupleActivityId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async getRandomActivity(category?: string, excludeCompleted: boolean = true, coupleId?: string) {
+    let query = supabase
+      .from('activities')
+      .select('*');
+
+    if (category) {
+      query = query.eq('category', category);
+    }
+
+    const { data: activities, error } = await query;
+    if (error) throw error;
+
+    if (excludeCompleted && coupleId) {
+      // Get completed activities for this couple
+      const { data: completedActivities } = await supabase
+        .from('couple_activities')
+        .select('activity_id')
+        .eq('couple_id', coupleId)
+        .eq('status', 'completed');
+
+      const completedIds = completedActivities?.map(ca => ca.activity_id) || [];
+      const availableActivities = activities.filter(a => !completedIds.includes(a.id));
+      
+      if (availableActivities.length === 0) {
+        return activities[Math.floor(Math.random() * activities.length)];
+      }
+      
+      return availableActivities[Math.floor(Math.random() * availableActivities.length)];
+    }
+
+    return activities[Math.floor(Math.random() * activities.length)];
+  },
+
+  // Servicios de Retos Semanales
+  async getWeeklyChallenges(coupleId: string) {
+    const { data, error } = await supabase
+      .from('weekly_challenges')
+      .select('*')
+      .eq('couple_id', coupleId)
+      .order('week_start', { ascending: false });
+
+    if (error) throw error;
+    return data;
+  },
+
+  async createWeeklyChallenge(coupleId: string, title: string, description: string) {
+    const today = new Date();
+    const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
+    
+    const { data, error } = await supabase
+      .from('weekly_challenges')
+      .insert({
+        couple_id: coupleId,
+        title,
+        description,
+        week_start: startOfWeek.toISOString().split('T')[0],
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async updateWeeklyChallenge(challengeId: string, updates: Partial<WeeklyChallenge>) {
+    const { data, error } = await supabase
+      .from('weekly_challenges')
+      .update(updates)
+      .eq('id', challengeId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  // Servicios de Lista de Deseos
+  async getWishlistItems(coupleId: string) {
+    const { data, error } = await supabase
+      .from('wishlist_items')
+      .select(`
+        *,
+        user_profiles!added_by (display_name)
+      `)
+      .eq('couple_id', coupleId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data;
+  },
+
+  async createWishlistItem(
+    coupleId: string,
+    addedBy: string,
+    title: string,
+    description: string,
+    category: 'travel' | 'experiences' | 'gifts' | 'goals' | 'general',
+    priority: 'low' | 'medium' | 'high' | 'urgent',
+    estimatedCost?: number,
+    imageUrl?: string
+  ) {
+    const { data, error } = await supabase
+      .from('wishlist_items')
+      .insert({
+        couple_id: coupleId,
+        added_by: addedBy,
+        title,
+        description,
+        category,
+        priority,
+        estimated_cost: estimatedCost,
+        image_url: imageUrl,
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async updateWishlistItem(itemId: string, updates: Partial<WishlistItem>) {
+    const { data, error } = await supabase
+      .from('wishlist_items')
+      .update(updates)
+      .eq('id', itemId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async deleteWishlistItem(itemId: string) {
+    const { error } = await supabase
+      .from('wishlist_items')
+      .delete()
+      .eq('id', itemId);
+
+    if (error) throw error;
   },
 
   // Suscripciones en tiempo real
