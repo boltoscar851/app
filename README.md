@@ -155,17 +155,18 @@ src/
 - [x] Calendario de eventos especiales
 - [ ] Galería colaborativa (próximamente)
 
-### Fase 4 - Actividades y Juegos
-- [ ] Ruleta de actividades
-- [ ] Retos semanales
-- [ ] Preguntas del día
-- [ ] Lista de deseos compartida
+### Fase 4 - Actividades y Juegos ✅
+- [x] Ruleta de actividades con categorías
+- [x] Retos semanales personalizados
+- [x] Lista de deseos compartida con prioridades
+- [x] Sistema de actividades completadas
 
-### Fase 5 - Sistema Premium
-- [ ] Códigos premium
-- [ ] Funcionalidades exclusivas
-- [ ] Temas personalizables
-- [ ] Almacenamiento en la nube
+### Fase 5 - Sistema Premium ✅
+- [x] Códigos premium con diferentes tipos
+- [x] Funcionalidades exclusivas por suscripción
+- [x] Temas personalizables (gratuitos y premium)
+- [x] Sistema de configuración de pareja
+- [x] Gestión de características premium
 
 ## 🔐 Seguridad y Privacidad
 

@@ -31,3 +31,13 @@ export const rules = [
 ];
 
 export const goldenRule = "Amarnos por siempre 💗🤍";
+
+// Reglas personalizadas para usuarios premium
+export const customRulesEnabled = (premiumStatus: any) => {
+  return premiumStatus?.features?.custom_rules?.enabled || false;
+};
+
+// Función para obtener reglas (incluye personalizadas si es premium)
+export const getAllRules = (customRules: string[] = []) => {
+  return [...rules, ...customRules];
+};
