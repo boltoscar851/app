@@ -1,6 +1,6 @@
 # Reglas de la Relación 💕
 
-Una hermosa aplicación web que muestra las reglas de una relación especial entre Oscar y Yuritzy.
+Una hermosa aplicación web que muestra las 29 reglas de una relación especial entre Oscar y Yuritzy.
 
 ## 🌟 Características
 
@@ -14,7 +14,7 @@ Una hermosa aplicación web que muestra las reglas de una relación especial ent
 ## 🚀 Cómo usar
 
 1. Simplemente abre el archivo `index.html` en tu navegador web
-2. ¡Disfruta explorando las 27 reglas del amor! 💕
+2. ¡Disfruta explorando las 29 reglas del amor! 💕
 
 ## 📱 Características Responsive
 
@@ -59,7 +59,7 @@ Este proyecto está optimizado para GitHub Pages:
 
 ## 💝 Regla de Oro
 
-**Regla #28**: Amarnos por siempre 💗🤍
+**Regla #30**: Amarnos por siempre 💗🤍
 
 ---
 
