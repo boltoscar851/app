@@ -13,9 +13,7 @@
     "build:production": "eas build --platform android --profile production",
     "submit:android": "eas submit --platform android",
     "submit:ios": "eas submit --platform ios",
-    "clear-cache": "expo start --clear",
-    "check-env": "node scripts/check-env.js",
-    "prebuild": "npm run check-env"
+    "clear-cache": "expo start --clear"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.0.0",
@@ -47,6 +45,7 @@
     "@babel/core": "^7.20.0",
     "@types/react": "~18.2.45",
     "@types/react-native": "~0.73.0",
+    "react-native-dotenv": "^3.4.11",
     "typescript": "^5.1.3"
   },
   "private": true

@@ -1,62 +1,27 @@
 import { createClient } from '@supabase/supabase-js';
 import { Platform } from 'react-native';
 import { Database } from '../types/database';
+import { EXPO_PUBLIC_SUPABASE_URL, EXPO_PUBLIC_SUPABASE_ANON_KEY } from '@env';
 
-// Get environment variables with fallbacks
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || 
-                   (typeof window !== 'undefined' && (window as any).__EXPO_ENV__?.EXPO_PUBLIC_SUPABASE_URL) || 
-                   '';
-const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 
-                       (typeof window !== 'undefined' && (window as any).__EXPO_ENV__?.EXPO_PUBLIC_SUPABASE_ANON_KEY) || 
-                       '';
+// Get environment variables from react-native-dotenv
+const supabaseUrl = EXPO_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = EXPO_PUBLIC_SUPABASE_ANON_KEY;
 
 // Log warning for missing environment variables
 if (!supabaseUrl || !supabaseAnonKey) {
   console.warn('Supabase environment variables not configured. Please check your .env file and build configuration.');
-  console.warn('Expected EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY');
+  console.warn('Make sure to configure EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY in your .env file');
 }
 
-// Provide fallback values for production builds
-const finalSupabaseUrl = supabaseUrl || 'https://placeholder.supabase.co';
-const finalSupabaseAnonKey = supabaseAnonKey || 'placeholder-key';
-
-let supabaseClient;
-
-try {
-  supabaseClient = createClient<Database>(finalSupabaseUrl, finalSupabaseAnonKey, {
-    auth: {
-      autoRefreshToken: true,
-      persistSession: true,
-      detectSessionInUrl: false,
-      storage: Platform.OS !== 'web' ? undefined : window.localStorage,
-    },
-  });
-} catch (error) {
-  console.error('Error creating Supabase client:', error);
-  // Create a mock client for fallback
-  supabaseClient = {
-    auth: {
-      getSession: () => Promise.resolve({ data: { session: null }, error: null }),
-      onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
-      signInWithPassword: () => Promise.reject(new Error('Supabase not configured')),
-      signUp: () => Promise.reject(new Error('Supabase not configured')),
-      signOut: () => Promise.reject(new Error('Supabase not configured')),
-      getUser: () => Promise.resolve({ data: { user: null }, error: null }),
-    },
-    from: () => ({
-      select: () => Promise.reject(new Error('Supabase not configured')),
-      insert: () => Promise.reject(new Error('Supabase not configured')),
-      update: () => Promise.reject(new Error('Supabase not configured')),
-      delete: () => Promise.reject(new Error('Supabase not configured')),
-    }),
-    channel: () => ({
-      on: () => ({ subscribe: () => {} }),
-    }),
-    rpc: () => Promise.reject(new Error('Supabase not configured')),
-  } as any;
-}
-
-export const supabase = supabaseClient;
+// Create Supabase client
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: false,
+    storage: Platform.OS !== 'web' ? undefined : window.localStorage,
+  },
+});
 
 // Tipos para la aplicación
 export type User = Database['public']['Tables']['user_profiles']['Row'];
