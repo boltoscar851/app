@@ -2,12 +2,18 @@ import { createClient } from '@supabase/supabase-js';
 import { Platform } from 'react-native';
 import { Database } from '../types/database';
 
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || '';
-const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '';
+// Get environment variables with fallbacks
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || 
+                   (typeof window !== 'undefined' && (window as any).__EXPO_ENV__?.EXPO_PUBLIC_SUPABASE_URL) || 
+                   '';
+const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 
+                       (typeof window !== 'undefined' && (window as any).__EXPO_ENV__?.EXPO_PUBLIC_SUPABASE_ANON_KEY) || 
+                       '';
 
 // Log warning for missing environment variables
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn('Supabase environment variables not configured');
+  console.warn('Supabase environment variables not configured. Please check your .env file and build configuration.');
+  console.warn('Expected EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY');
 }
 
 // Provide fallback values for production builds

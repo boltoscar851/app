@@ -127,9 +127,39 @@ npm install -g eas-cli
 # Copiar el archivo de configuración
 cp .env.example .env
 
-# Editar .env con tus credenciales de Supabase
-# EXPO_PUBLIC_SUPABASE_URL=tu_url_de_supabase
-# EXPO_PUBLIC_SUPABASE_ANON_KEY=tu_clave_anonima
+# Editar .env con tus credenciales reales de Supabase
+# 1. Ve a https://supabase.com/dashboard
+# 2. Selecciona tu proyecto
+# 3. Ve a Settings > API
+# 4. Copia tu Project URL y anon/public key
+# 5. Reemplaza los valores en .env
+```
+
+### Variables de Entorno para Builds
+
+**IMPORTANTE**: Para que las variables de entorno funcionen en builds de producción (APK/IPA), debes:
+
+1. **Configurar el archivo .env** con tus credenciales reales de Supabase:
+```bash
+EXPO_PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
+EXPO_PUBLIC_SUPABASE_ANON_KEY=tu-clave-anonima-real
+```
+
+2. **Verificar que las variables estén configuradas** antes de hacer el build:
+```bash
+# Verificar que las variables están configuradas
+cat .env
+
+# Las variables deben empezar con EXPO_PUBLIC_ para estar disponibles en el cliente
+```
+
+3. **Hacer el build con las variables cargadas**:
+```bash
+# Build de preview (APK) con variables de entorno
+eas build --platform android --profile preview
+
+# Build de producción con variables de entorno
+eas build --platform android --profile production
 ```
 
 ### Desarrollo

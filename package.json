@@ -13,7 +13,9 @@
     "build:production": "eas build --platform android --profile production",
     "submit:android": "eas submit --platform android",
     "submit:ios": "eas submit --platform ios",
-    "clear-cache": "expo start --clear"
+    "clear-cache": "expo start --clear",
+    "check-env": "node scripts/check-env.js",
+    "prebuild": "npm run check-env"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.0.0",
