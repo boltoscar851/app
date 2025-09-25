@@ -84,10 +84,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     } catch (error) {
       console.error('Error loading user profile:', error);
-      // Don't show alert in production builds to avoid crashes
-      if (__DEV__) {
-        Alert.alert('Error', 'Error al cargar el perfil de usuario');
-      }
+      // Silently handle errors in production to prevent crashes
+      console.warn('Failed to load user profile, continuing with limited functionality');
     } finally {
       setLoading(false);
     }

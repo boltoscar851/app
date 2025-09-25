@@ -2,7 +2,7 @@
   "expo": {
     "name": "Nuestro Amor",
     "slug": "nuestro-amor-app",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
@@ -10,7 +10,8 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#000000"
+      "backgroundColor": "#000000",
+      "hideExponentText": true
     },
     "updates": {
       "fallbackToCacheTimeout": 0
@@ -21,7 +22,10 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.nuestroamor.app",
-      "buildNumber": "1"
+      "buildNumber": "2",
+      "infoPlist": {
+        "UIBackgroundModes": ["background-processing"]
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -29,11 +33,17 @@
         "backgroundColor": "#000000"
       },
       "package": "com.nuestroamor.app",
-      "versionCode": 1,
+      "versionCode": 2,
       "permissions": [
         "android.permission.VIBRATE",
         "android.permission.INTERNET",
-        "android.permission.ACCESS_NETWORK_STATE"
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION"
+      ],
+      "blockedPermissions": [
+        "android.permission.CAMERA"
       ]
     },
     "web": {
@@ -41,15 +51,24 @@
     },
     "plugins": [
       "expo-font",
+      "expo-splash-screen",
       [
         "expo-build-properties",
         {
           "android": {
             "enableProguardInReleaseBuilds": true,
-            "enableShrinkResourcesInReleaseBuilds": true
+            "enableShrinkResourcesInReleaseBuilds": true,
+            "compileSdkVersion": 34,
+            "targetSdkVersion": 34,
+            "minSdkVersion": 21
           }
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "nuestro-amor-app"
+      }
+    }
   }
 }

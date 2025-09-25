@@ -5,8 +5,9 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
-import { View, Text, Alert } from 'react-native';
+import { View, Text, Alert, ActivityIndicator } from 'react-native';
 import { Platform } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 
 import { AuthProvider, useAuth } from './src/contexts/AuthContext';
 import RulesScreen from './src/screens/RulesScreen';
@@ -30,6 +31,37 @@ const Tab = createBottomTabNavigator();
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
 
+// Loading Screen Component
+function LoadingScreen() {
+  return (
+    <LinearGradient
+      colors={['#000000', '#1a0033', '#330066', '#1a0033', '#000000']}
+      style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+    >
+      <View style={{ alignItems: 'center' }}>
+        <Text style={{ 
+          fontSize: 32, 
+          fontWeight: 'bold', 
+          color: '#ff69b4', 
+          marginBottom: 30,
+          textAlign: 'center'
+        }}>
+          💕 Nuestro Amor 💕
+        </Text>
+        <ActivityIndicator size="large" color="#ff69b4" />
+        <Text style={{ 
+          color: '#ff69b4', 
+          fontSize: 16, 
+          marginTop: 20,
+          textAlign: 'center'
+        }}>
+          Cargando...
+        </Text>
+      </View>
+    </LinearGradient>
+  );
+}
+
 // Error boundary component
 class ErrorBoundary extends React.Component<
   { children: React.ReactNode },
@@ -46,27 +78,29 @@ class ErrorBoundary extends React.Component<
 
   componentDidCatch(error: Error, errorInfo: any) {
     console.error('App Error:', error, errorInfo);
-    if (Platform.OS !== 'web') {
-      Alert.alert(
-        'Error de la aplicación',
-        `Ha ocurrido un error: ${error.message}`,
-        [{ text: 'OK' }]
-      );
-    }
+    // Don't show alert in production to prevent crashes
+    console.warn('App crashed:', error.message);
   }
 
   render() {
     if (this.state.hasError) {
       return (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#000000' }}>
-          <Text style={{ color: '#ff69b4', fontSize: 18, textAlign: 'center', margin: 20 }}>
-            Ha ocurrido un error en la aplicación.{'\n'}
-            Por favor, reinicia la app.
-          </Text>
-          <Text style={{ color: '#d1d5db', fontSize: 14, textAlign: 'center', margin: 20 }}>
-            {this.state.error?.message}
-          </Text>
-        </View>
+        <LinearGradient
+          colors={['#000000', '#1a0033', '#330066', '#1a0033', '#000000']}
+          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+        >
+          <View style={{ alignItems: 'center', padding: 20 }}>
+            <Text style={{ color: '#ff69b4', fontSize: 18, textAlign: 'center', marginBottom: 20 }}>
+              Ha ocurrido un error en la aplicación.{'\n'}
+              Por favor, reinicia la app.
+            </Text>
+            {__DEV__ && (
+              <Text style={{ color: '#d1d5db', fontSize: 14, textAlign: 'center' }}>
+                {this.state.error?.message}
+              </Text>
+            )}
+          </View>
+        </LinearGradient>
       );
     }
 
@@ -218,34 +252,51 @@ function AppContent() {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#000000' }}>
-        <Text style={{ color: '#ff69b4', fontSize: 18 }}>Cargando...</Text>
-      </View>
-    );
+    return <LoadingScreen />;
   }
 
   return user ? <AuthenticatedApp /> : <AuthScreen />;
 }
 
 export default function App() {
-  const [fontsLoaded] = useFonts({});
+  const [fontsLoaded, fontError] = useFonts({});
+  const [appIsReady, setAppIsReady] = React.useState(false);
 
   React.useEffect(() => {
-    // Hide splash screen when fonts are loaded or after timeout
-    const timer = setTimeout(() => {
-      SplashScreen.hideAsync().catch(console.warn);
-    }, 2000);
-
-    return () => clearTimeout(timer);
-  }, [fontsLoaded]);
-
-  // Hide splash screen when fonts are loaded
-  React.useEffect(() => {
-    if (fontsLoaded) {
-      SplashScreen.hideAsync().catch(console.warn);
+    async function prepare() {
+      try {
+        // Pre-load fonts, make any API calls you need to do here
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Minimum loading time
+      } catch (e) {
+        console.warn('Error during app preparation:', e);
+      } finally {
+        // Tell the application to render
+        setAppIsReady(true);
+      }
     }
-  }, [fontsLoaded]);
+
+    prepare();
+  }, []);
+
+  React.useEffect(() => {
+    if (appIsReady && (fontsLoaded || fontError)) {
+      // Hide the splash screen once the app is ready and fonts are loaded
+      const hideSplash = async () => {
+        try {
+          await SplashScreen.hideAsync();
+        } catch (error) {
+          console.warn('Error hiding splash screen:', error);
+        }
+      };
+      
+      // Small delay to ensure smooth transition
+      setTimeout(hideSplash, 500);
+    }
+  }, [appIsReady, fontsLoaded, fontError]);
+
+  if (!appIsReady || (!fontsLoaded && !fontError)) {
+    return null; // Keep splash screen visible
+  }
 
   return (
     <ErrorBoundary>

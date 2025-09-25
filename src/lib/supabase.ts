@@ -5,9 +5,9 @@ import { Database } from '../types/database';
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '';
 
-// Only throw error in development
-if ((!supabaseUrl || !supabaseAnonKey) && __DEV__) {
-  console.error('Missing Supabase environment variables');
+// Log warning for missing environment variables
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.warn('Supabase environment variables not configured');
 }
 
 // Provide fallback values for production builds
@@ -22,6 +22,7 @@ try {
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: false,
+      storage: Platform.OS !== 'web' ? undefined : window.localStorage,
     },
   });
 } catch (error) {
