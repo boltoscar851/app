@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { Alert, Platform } from 'react-native';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { supabase, authService, User, Couple } from '../lib/supabase';
 
@@ -83,6 +84,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     } catch (error) {
       console.error('Error loading user profile:', error);
+      // Don't show alert in production builds to avoid crashes
+      if (__DEV__) {
+        Alert.alert('Error', 'Error al cargar el perfil de usuario');
+      }
     } finally {
       setLoading(false);
     }
@@ -94,6 +99,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await authService.signIn(email, password);
     } catch (error) {
       setLoading(false);
+      console.error('Sign in error:', error);
       throw error;
     }
   };
@@ -121,6 +127,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return { inviteCode: result.inviteCode };
     } catch (error) {
       setLoading(false);
+      console.error('Sign up couple error:', error);
       throw error;
     }
   };
@@ -136,6 +143,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await authService.joinCouple(email, password, name, inviteCode);
     } catch (error) {
       setLoading(false);
+      console.error('Join couple error:', error);
       throw error;
     }
   };
@@ -146,6 +154,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await authService.signOut();
     } catch (error) {
       setLoading(false);
+      console.error('Sign out error:', error);
       throw error;
     }
   };

@@ -1,20 +1,55 @@
 import { createClient } from '@supabase/supabase-js';
+import { Platform } from 'react-native';
 import { Database } from '../types/database';
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '';
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
+// Only throw error in development
+if ((!supabaseUrl || !supabaseAnonKey) && __DEV__) {
+  console.error('Missing Supabase environment variables');
 }
 
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: false,
-  },
-});
+// Provide fallback values for production builds
+const finalSupabaseUrl = supabaseUrl || 'https://placeholder.supabase.co';
+const finalSupabaseAnonKey = supabaseAnonKey || 'placeholder-key';
+
+let supabaseClient;
+
+try {
+  supabaseClient = createClient<Database>(finalSupabaseUrl, finalSupabaseAnonKey, {
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: false,
+    },
+  });
+} catch (error) {
+  console.error('Error creating Supabase client:', error);
+  // Create a mock client for fallback
+  supabaseClient = {
+    auth: {
+      getSession: () => Promise.resolve({ data: { session: null }, error: null }),
+      onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
+      signInWithPassword: () => Promise.reject(new Error('Supabase not configured')),
+      signUp: () => Promise.reject(new Error('Supabase not configured')),
+      signOut: () => Promise.reject(new Error('Supabase not configured')),
+      getUser: () => Promise.resolve({ data: { user: null }, error: null }),
+    },
+    from: () => ({
+      select: () => Promise.reject(new Error('Supabase not configured')),
+      insert: () => Promise.reject(new Error('Supabase not configured')),
+      update: () => Promise.reject(new Error('Supabase not configured')),
+      delete: () => Promise.reject(new Error('Supabase not configured')),
+    }),
+    channel: () => ({
+      on: () => ({ subscribe: () => {} }),
+    }),
+    rpc: () => Promise.reject(new Error('Supabase not configured')),
+  } as any;
+}
+
+export const supabase = supabaseClient;
 
 // Tipos para la aplicación
 export type User = Database['public']['Tables']['user_profiles']['Row'];
@@ -185,6 +220,10 @@ export const authService = {
     coupleName: string
   ) {
     try {
+      if (!supabaseUrl || !supabaseAnonKey) {
+        throw new Error('Supabase no está configurado. Por favor, configura las variables de entorno.');
+      }
+
       // Registrar primer usuario
       const { data: user1, error: error1 } = await supabase.auth.signUp({
         email: email1,
@@ -236,6 +275,7 @@ export const authService = {
         inviteCode: couple.id, // Código para que la pareja se una
       };
     } catch (error) {
+      console.error('Error in signUpCouple:', error);
       throw error;
     }
   },
@@ -248,6 +288,10 @@ export const authService = {
     inviteCode: string
   ) {
     try {
+      if (!supabaseUrl || !supabaseAnonKey) {
+        throw new Error('Supabase no está configurado. Por favor, configura las variables de entorno.');
+      }
+
       // Registrar segundo usuario
       const { data: user, error: userError } = await supabase.auth.signUp({
         email: email,
@@ -303,12 +347,17 @@ export const authService = {
 
       return { user, couple };
     } catch (error) {
+      console.error('Error in joinCouple:', error);
       throw error;
     }
   },
 
   // Iniciar sesión
   async signIn(email: string, password: string) {
+    if (!supabaseUrl || !supabaseAnonKey) {
+      throw new Error('Supabase no está configurado. Por favor, configura las variables de entorno.');
+    }
+
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -332,6 +381,10 @@ export const authService = {
 
   // Obtener perfil del usuario
   async getUserProfile(userId: string) {
+    if (!supabaseUrl || !supabaseAnonKey) {
+      throw new Error('Supabase no está configurado');
+    }
+
     const { data, error } = await supabase
       .from('user_profiles')
       .select(`

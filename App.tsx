@@ -5,7 +5,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
-import { View, Text } from 'react-native';
+import { View, Text, Alert } from 'react-native';
 import { Platform } from 'react-native';
 
 import { AuthProvider, useAuth } from './src/contexts/AuthContext';
@@ -29,6 +29,50 @@ const Tab = createBottomTabNavigator();
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
+
+// Error boundary component
+class ErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean; error?: Error }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: any) {
+    console.error('App Error:', error, errorInfo);
+    if (Platform.OS !== 'web') {
+      Alert.alert(
+        'Error de la aplicación',
+        `Ha ocurrido un error: ${error.message}`,
+        [{ text: 'OK' }]
+      );
+    }
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#000000' }}>
+          <Text style={{ color: '#ff69b4', fontSize: 18, textAlign: 'center', margin: 20 }}>
+            Ha ocurrido un error en la aplicación.{'\n'}
+            Por favor, reinicia la app.
+          </Text>
+          <Text style={{ color: '#d1d5db', fontSize: 14, textAlign: 'center', margin: 20 }}>
+            {this.state.error?.message}
+          </Text>
+        </View>
+      );
+    }
+
+    return this.props.children;
+  }
+}
 
 function AuthenticatedApp() {
   return (
@@ -188,20 +232,29 @@ export default function App() {
   const [fontsLoaded] = useFonts({});
 
   React.useEffect(() => {
-    // Always hide splash screen after a short delay
+    // Hide splash screen when fonts are loaded or after timeout
     const timer = setTimeout(() => {
-      SplashScreen.hideAsync();
-    }, 1000);
+      SplashScreen.hideAsync().catch(console.warn);
+    }, 2000);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [fontsLoaded]);
+
+  // Hide splash screen when fonts are loaded
+  React.useEffect(() => {
+    if (fontsLoaded) {
+      SplashScreen.hideAsync().catch(console.warn);
+    }
+  }, [fontsLoaded]);
 
   return (
-    <AuthProvider>
-      <NavigationContainer>
-        <StatusBar style="light" />
-        <AppContent />
-      </NavigationContainer>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <NavigationContainer>
+          <StatusBar style="light" />
+          <AppContent />
+        </NavigationContainer>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }
