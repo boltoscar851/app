@@ -122,6 +122,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         name2,
         coupleName
       );
+      // No hacer auto-login aquí, dejar que el usuario haga login manualmente
+      setLoading(false);
       return { inviteCode: result.inviteCode };
     } catch (error) {
       setLoading(false);

@@ -24,7 +24,7 @@ type AuthMode = 'signin' | 'signup' | 'join';
 
 const AuthScreen: React.FC = () => {
   const { signIn, signUpCouple, joinCouple, loading } = useAuth();
-  const [mode, setMode] = useState<AuthMode>('signin');
+  const [mode, setMode] = useState<AuthMode>('signup');
   
   // Estados para iniciar sesión
   const [email, setEmail] = useState('');
@@ -60,22 +60,28 @@ const AuthScreen: React.FC = () => {
   };
 
   const handleSignUpCouple = async () => {
-    if (!coupleName || !email1 || !password1 || !name1 || !email2 || !password2 || !name2) {
-      Alert.alert('Error', 'Por favor completa todos los campos');
+    if (!coupleName || !email1 || !password1 || !name1) {
+      Alert.alert('Error', 'Por favor completa los campos del primer usuario y el nombre de la pareja');
       return;
     }
 
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      const result = await signUpCouple(email1, password1, name1, email2, password2, name2, coupleName);
+      const result = await signUpCouple(email1, password1, name1, '', '', '', coupleName);
       
       Alert.alert(
-        '¡Pareja creada!',
-        `Tu pareja ha sido creada exitosamente.\n\nCódigo de invitación: ${result.inviteCode}\n\nComparte este código con tu pareja para que se una.`,
-        [{ text: 'Entendido' }]
+        '¡Usuario creado!',
+        `Tu cuenta ha sido creada exitosamente.\n\nCódigo de invitación para tu pareja: ${result.inviteCode}\n\nComparte este código con tu pareja para que se una a la relación.`,
+        [{ 
+          text: 'Copiar código', 
+          onPress: () => {
+            // En una app real, aquí copiarías al clipboard
+            console.log('Código copiado:', result.inviteCode);
+          }
+        }]
       );
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Error al crear la pareja');
+      Alert.alert('Error', error.message || 'Error al crear la cuenta');
     }
   };
 
@@ -142,27 +148,27 @@ const AuthScreen: React.FC = () => {
 
   const renderSignUp = () => (
     <ScrollView style={styles.formContainer} showsVerticalScrollIndicator={false}>
-      <Text style={styles.formTitle}>👑 Crear Nueva Pareja</Text>
+      <Text style={styles.formTitle}>👑 Crear Cuenta</Text>
       
       <TextInput
         style={styles.input}
-        placeholder="Nombre de la pareja (ej: Oscar y Yuritzy)"
+        placeholder="Nombre de la relación (ej: Oscar y Yuritzy)"
         placeholderTextColor="#999"
         value={coupleName}
         onChangeText={setCoupleName}
       />
       
-      <Text style={styles.sectionTitle}>💖 Primer Miembro</Text>
+      <Text style={styles.sectionTitle}>💖 Tus Datos</Text>
       <TextInput
         style={styles.input}
-        placeholder="Nombre"
+        placeholder="Tu nombre"
         placeholderTextColor="#999"
         value={name1}
         onChangeText={setName1}
       />
       <TextInput
         style={styles.input}
-        placeholder="Email"
+        placeholder="Tu email"
         placeholderTextColor="#999"
         value={email1}
         onChangeText={setEmail1}
@@ -171,38 +177,19 @@ const AuthScreen: React.FC = () => {
       />
       <TextInput
         style={styles.input}
-        placeholder="Contraseña"
+        placeholder="Tu contraseña"
         placeholderTextColor="#999"
         value={password1}
         onChangeText={setPassword1}
         secureTextEntry
       />
       
-      <Text style={styles.sectionTitle}>💝 Segundo Miembro</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Nombre"
-        placeholderTextColor="#999"
-        value={name2}
-        onChangeText={setName2}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        placeholderTextColor="#999"
-        value={email2}
-        onChangeText={setEmail2}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Contraseña"
-        placeholderTextColor="#999"
-        value={password2}
-        onChangeText={setPassword2}
-        secureTextEntry
-      />
+      <View style={styles.infoBox}>
+        <Text style={styles.infoTitle}>ℹ️ Siguiente paso</Text>
+        <Text style={styles.infoText}>
+          Después de crear tu cuenta, recibirás un código de invitación para compartir con tu pareja.
+        </Text>
+      </View>
       
       <TouchableOpacity
         style={styles.primaryButton}
@@ -215,7 +202,7 @@ const AuthScreen: React.FC = () => {
           style={styles.buttonGradient}
         >
           <Text style={styles.buttonText}>
-            {loading ? 'Creando...' : 'Crear Pareja'}
+            {loading ? 'Creando...' : 'Crear Cuenta'}
           </Text>
         </LinearGradient>
       </TouchableOpacity>
@@ -429,6 +416,25 @@ const styles = StyleSheet.create({
     marginTop: 15,
     marginBottom: 10,
     textAlign: 'center',
+  },
+  infoBox: {
+    backgroundColor: 'rgba(59, 130, 246, 0.2)',
+    borderRadius: 12,
+    padding: 15,
+    marginTop: 15,
+    borderWidth: 1,
+    borderColor: '#3b82f6',
+  },
+  infoTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#60a5fa',
+    marginBottom: 8,
+  },
+  infoText: {
+    fontSize: 14,
+    color: '#d1d5db',
+    lineHeight: 20,
   },
   input: {
     backgroundColor: 'rgba(255, 255, 255, 0.1)',

@@ -270,6 +270,43 @@ export const authService = {
           });
       }
 
+      // Solo crear el segundo usuario si se proporcionan sus datos
+      if (email2 && password2 && name2) {
+        // Registrar segundo usuario
+        const { data: user2, error: error2 } = await supabase.auth.signUp({
+          email: email2,
+          password: password2,
+          options: {
+            data: {
+              display_name: name2,
+            },
+          },
+        });
+
+        if (error2) throw error2;
+
+        // Actualizar perfil del segundo usuario con la pareja
+        if (user2.user) {
+          await supabase
+            .from('user_profiles')
+            .update({
+              couple_id: couple.id,
+              display_name: name2,
+            })
+            .eq('id', user2.user.id);
+
+          // Crear miembro de pareja para el segundo usuario
+          await supabase
+            .from('couple_members')
+            .insert({
+              couple_id: couple.id,
+              user_id: user2.user.id,
+              name: name2,
+              role: 'partner_2',
+            });
+        }
+      }
+
       return {
         user1,
         couple,
