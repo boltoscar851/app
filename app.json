@@ -62,9 +62,7 @@
           }
         }
       ],
-      [
-        "expo-constants"
-      ]
+expo-constants
     ],
     "extra": {
       "eas": {
