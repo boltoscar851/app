@@ -111,6 +111,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     coupleName: string
   ) => {
     setLoading(true);
+    console.log('Starting signUpCouple process...');
     try {
       const result = await authService.signUpCouple(
         email1,
@@ -122,6 +123,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         coupleName
       );
       // No hacer auto-login aquí, dejar que el usuario haga login manualmente
+      console.log('SignUpCouple successful:', result);
       setLoading(false);
       return { inviteCode: result.inviteCode };
     } catch (error) {
@@ -138,8 +140,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     inviteCode: string
   ) => {
     setLoading(true);
+    console.log('Starting joinCouple process...');
     try {
       await authService.joinCouple(email, password, name, inviteCode);
+      console.log('JoinCouple successful');
     } catch (error) {
       setLoading(false);
       console.error('Join couple error:', error);
@@ -149,8 +153,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signOut = async () => {
     setLoading(true);
+    console.log('Starting signOut process...');
     try {
       await authService.signOut();
+      console.log('SignOut successful');
     } catch (error) {
       setLoading(false);
       console.error('Sign out error:', error);
