@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "192379459077",
+    "project_id": "nuestra-relacion",
+    "storage_bucket": "nuestra-relacion.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:192379459077:android:88e13c3ec6e98174f36e6c",
+        "android_client_info": {
+          "package_name": "Nuestra.Relacion.com"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBQYyDMShze4A4uFjlEbpqqaAkOTk4oqWE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:192379459077:android:928d645755f389c6f36e6c",
+        "android_client_info": {
+          "package_name": "Nuestra.Relacion.y.o.com"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBQYyDMShze4A4uFjlEbpqqaAkOTk4oqWE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
