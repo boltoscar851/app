@@ -83,10 +83,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setCouple(coupleInfo.couples);
       }
     } catch (error) {
-      if (__DEV__) {
-        console.error('Error loading user profile:', error);
-      }
-      // Silently handle errors in production to prevent crashes
+      console.error('Error loading user profile:', error);
+      // Continue execution even if there's an error
     } finally {
       setLoading(false);
     }
@@ -98,9 +96,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await authService.signIn(email, password);
     } catch (error) {
       setLoading(false);
-      if (__DEV__) {
-        console.error('Sign in error:', error);
-      }
+      console.error('Sign in error:', error);
       throw error;
     }
   };
@@ -130,9 +126,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return { inviteCode: result.inviteCode };
     } catch (error) {
       setLoading(false);
-      if (__DEV__) {
-        console.error('Sign up couple error:', error);
-      }
+      console.error('Sign up couple error:', error);
       throw error;
     }
   };
@@ -148,9 +142,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await authService.joinCouple(email, password, name, inviteCode);
     } catch (error) {
       setLoading(false);
-      if (__DEV__) {
-        console.error('Join couple error:', error);
-      }
+      console.error('Join couple error:', error);
       throw error;
     }
   };
@@ -161,9 +153,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await authService.signOut();
     } catch (error) {
       setLoading(false);
-      if (__DEV__) {
-        console.error('Sign out error:', error);
-      }
+      console.error('Sign out error:', error);
       throw error;
     }
   };

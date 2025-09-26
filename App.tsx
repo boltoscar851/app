@@ -5,7 +5,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
-import { View, Text, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, ActivityIndicator } from 'react-native';
 import { Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -77,10 +77,7 @@ class ErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: any) {
-    if (__DEV__) {
-      console.error('App Error:', error, errorInfo);
-    }
-    // Don't show alert in production to prevent crashes
+    console.error('App Error:', error, errorInfo);
   }
 
   render() {
@@ -95,11 +92,6 @@ class ErrorBoundary extends React.Component<
               Ha ocurrido un error en la aplicación.{'\n'}
               Por favor, reinicia la app.
             </Text>
-            {__DEV__ && (
-              <Text style={{ color: '#d1d5db', fontSize: 14, textAlign: 'center' }}>
-                {this.state.error?.message}
-              </Text>
-            )}
           </View>
         </LinearGradient>
       );

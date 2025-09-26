@@ -2,27 +2,35 @@ import { createClient } from '@supabase/supabase-js';
 import { Platform } from 'react-native';
 import { Database } from '../types/database';
 
-const { EXPO_PUBLIC_SUPABASE_URL, EXPO_PUBLIC_SUPABASE_ANON_KEY } = process.env;
-
-// Get environment variables from react-native-dotenv
-const supabaseUrl = EXPO_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = EXPO_PUBLIC_SUPABASE_ANON_KEY;
+// Get environment variables from Expo
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 
 // Log warning for missing environment variables
 if (!supabaseUrl || !supabaseAnonKey) {
   console.warn('Supabase environment variables not configured. Please check your .env file and build configuration.');
-  console.warn('Make sure to configure EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY in your .env file');
+  console.warn('Make sure to configure EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY');
+  
+  // Provide fallback values for development
+  const fallbackUrl = 'https://placeholder.supabase.co';
+  const fallbackKey = 'placeholder-key';
+  
+  console.warn('Using fallback values for development. App functionality will be limited.');
 }
 
 // Create Supabase client
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+export const supabase = createClient<Database>(
+  supabaseUrl || 'https://placeholder.supabase.co', 
+  supabaseAnonKey || 'placeholder-key', 
+  {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: false,
     storage: Platform.OS !== 'web' ? undefined : window.localStorage,
   },
-});
+  }
+);
 
 // Tipos para la aplicación
 export type User = Database['public']['Tables']['user_profiles']['Row'];
