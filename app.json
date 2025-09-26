@@ -21,7 +21,7 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.nuestroamor.app",
+      "bundleIdentifier": "Nuestra.Relacion.com",
       "buildNumber": "2",
       "infoPlist": {
         "UIBackgroundModes": ["background-processing"]
