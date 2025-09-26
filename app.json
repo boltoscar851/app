@@ -56,13 +56,14 @@
         "expo-build-properties",
         {
           "android": {
-            "enableProguardInReleaseBuilds": true,
-            "enableShrinkResourcesInReleaseBuilds": true,
-            "compileSdkVersion": 34,
-            "targetSdkVersion": 34,
-            "minSdkVersion": 21
+            "packagingOptions": {
+              "pickFirst": ["**/libc++_shared.so", "**/libjsc.so"]
+            }
           }
         }
+      ],
+      [
+        "expo-constants"
       ]
     ],
     "extra": {

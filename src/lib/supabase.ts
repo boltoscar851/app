@@ -6,31 +6,21 @@ import { Database } from '../types/database';
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 
-// Log warning for missing environment variables
+// Validate environment variables
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn('Supabase environment variables not configured. Please check your .env file and build configuration.');
-  console.warn('Make sure to configure EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY');
-  
-  // Provide fallback values for development
-  const fallbackUrl = 'https://placeholder.supabase.co';
-  const fallbackKey = 'placeholder-key';
-  
-  console.warn('Using fallback values for development. App functionality will be limited.');
+  throw new Error('Missing Supabase environment variables. Please check your .env file.');
 }
 
 // Create Supabase client
-export const supabase = createClient<Database>(
-  supabaseUrl || 'https://placeholder.supabase.co', 
-  supabaseAnonKey || 'placeholder-key', 
-  {
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: false,
     storage: Platform.OS !== 'web' ? undefined : window.localStorage,
   },
-  }
-);
+});
+
 
 // Tipos para la aplicación
 export type User = Database['public']['Tables']['user_profiles']['Row'];
@@ -201,10 +191,6 @@ export const authService = {
     coupleName: string
   ) {
     try {
-      if (!supabaseUrl || !supabaseAnonKey) {
-        throw new Error('Supabase no está configurado. Por favor, configura las variables de entorno.');
-      }
-
       // Registrar primer usuario
       const { data: user1, error: error1 } = await supabase.auth.signUp({
         email: email1,
@@ -306,10 +292,6 @@ export const authService = {
     inviteCode: string
   ) {
     try {
-      if (!supabaseUrl || !supabaseAnonKey) {
-        throw new Error('Supabase no está configurado. Por favor, configura las variables de entorno.');
-      }
-
       // Registrar segundo usuario
       const { data: user, error: userError } = await supabase.auth.signUp({
         email: email,
@@ -372,10 +354,6 @@ export const authService = {
 
   // Iniciar sesión
   async signIn(email: string, password: string) {
-    if (!supabaseUrl || !supabaseAnonKey) {
-      throw new Error('Supabase no está configurado. Por favor, configura las variables de entorno.');
-    }
-
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -399,10 +377,6 @@ export const authService = {
 
   // Obtener perfil del usuario
   async getUserProfile(userId: string) {
-    if (!supabaseUrl || !supabaseAnonKey) {
-      throw new Error('Supabase no está configurado');
-    }
-
     const { data, error } = await supabase
       .from('user_profiles')
       .select(`
