@@ -1,22 +1,18 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  TextInput,
   TouchableOpacity,
-  FlatList,
-  KeyboardAvoidingView,
-  Platform,
+  ScrollView,
   SafeAreaView,
-  Alert,
+  Dimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../contexts/AuthContext';
-import { authService, Message } from '../lib/supabase';
 import FloatingHearts from '../components/FloatingHearts';
 import DaysTogetherWidget from '../components/widgets/DaysTogetherWidget';
 import NextEventWidget from '../components/widgets/NextEventWidget';
@@ -28,85 +24,12 @@ import DiaryWidget from '../components/widgets/DiaryWidget';
 import WishlistWidget from '../components/widgets/WishlistWidget';
 import SurpriseRouletteModal from '../components/SurpriseRouletteModal';
 
-const ChatScreen: React.FC = () => {
+const { width } = Dimensions.get('window');
+
+const HomeScreen: React.FC = () => {
   const navigation = useNavigation();
   const { user, userProfile, couple } = useAuth();
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [newMessage, setNewMessage] = useState('');
-  const [loading, setLoading] = useState(true);
-  const flatListRef = useRef<FlatList>(null);
   const [showSurpriseRoulette, setShowSurpriseRoulette] = useState(false);
-
-  useEffect(() => {
-    if (couple?.id) {
-      loadMessages();
-      
-      // Suscribirse a mensajes en tiempo real
-      const subscription = authService.subscribeToMessages(couple.id, (payload) => {
-        if (payload.new) {
-          const newMsg = payload.new as Message;
-          setMessages(prev => [newMsg, ...prev]);
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        }
-      });
-
-      return () => {
-        subscription.unsubscribe();
-      };
-    }
-  }, [couple?.id]);
-
-  const loadMessages = async () => {
-    if (!couple?.id) return;
-    
-    try {
-      const data = await authService.getMessages(couple.id);
-      setMessages(data);
-    } catch (error: any) {
-      Alert.alert('Error', 'No se pudieron cargar los mensajes');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const sendMessage = async () => {
-    if (!newMessage.trim() || !couple?.id || !user?.id) return;
-
-    try {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      await authService.sendMessage(couple.id, user.id, newMessage.trim());
-      setNewMessage('');
-    } catch (error: any) {
-      Alert.alert('Error', 'No se pudo enviar el mensaje');
-    }
-  };
-
-  const renderMessage = ({ item }: { item: Message }) => {
-    const isMyMessage = item.sender_id === user?.id;
-    
-    return (
-      <View style={[
-        styles.messageContainer,
-        isMyMessage ? styles.myMessage : styles.partnerMessage
-      ]}>
-        <BlurView 
-          intensity={20} 
-          style={[
-            styles.messageBubble,
-            isMyMessage ? styles.myBubble : styles.partnerBubble
-          ]}
-        >
-          <Text style={styles.messageText}>{item.content}</Text>
-          <Text style={styles.messageTime}>
-            {new Date(item.created_at).toLocaleTimeString('es-ES', {
-              hour: '2-digit',
-              minute: '2-digit'
-            })}
-          </Text>
-        </BlurView>
-      </View>
-    );
-  };
 
   return (
     <LinearGradient
@@ -116,69 +39,104 @@ const ChatScreen: React.FC = () => {
       <FloatingHearts />
       
       <SafeAreaView style={styles.safeArea}>
-        {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => navigation.goBack()}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.backButtonText}>← Volver</Text>
-          </TouchableOpacity>
-          
-          <Text style={styles.headerTitle}>💕 Chat Privado</Text>
-          
-          <View style={styles.headerRight}>
-            <Text style={styles.coupleStatus}>🟢 En línea</Text>
-          </View>
+          <Text style={styles.headerTitle}>💕 Nuestro Amor 💕</Text>
+          <Text style={styles.headerSubtitle}>
+            {couple?.name || 'Bienvenidos'}
+          </Text>
         </View>
 
-        <KeyboardAvoidingView 
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={styles.chatContainer}
+        <ScrollView
+          style={styles.content}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
         >
-          {/* Messages */}
-          <FlatList
-            ref={flatListRef}
-            data={messages}
-            renderItem={renderMessage}
-            keyExtractor={(item) => item.id}
-            style={styles.messagesList}
-            contentContainerStyle={styles.messagesContent}
-            inverted
-            showsVerticalScrollIndicator={false}
-          />
+          {/* Main Widget - Days Together */}
+          <View style={styles.mainWidget}>
+            <DaysTogetherWidget />
+          </View>
 
-          {/* Input */}
-          <BlurView intensity={20} style={styles.inputContainer}>
-            <TextInput
-              style={styles.textInput}
-              value={newMessage}
-              onChangeText={setNewMessage}
-              placeholder="Escribe un mensaje de amor..."
-              placeholderTextColor="#999"
-              multiline
-              maxLength={500}
-            />
+          {/* Secondary Widgets Grid */}
+          <View style={styles.widgetsGrid}>
+            <NextEventWidget onPress={() => navigation.navigate('Calendar' as never)} />
+            <MessagesWidget onPress={() => navigation.navigate('Chat' as never)} />
+            <PhotosWidget onPress={() => navigation.navigate('Gallery' as never)} />
+            <DistanceWidget />
+            <ActivitiesWidget onPress={() => navigation.navigate('Activities' as never)} />
+            <DiaryWidget onPress={() => navigation.navigate('Diary' as never)} />
+            <WishlistWidget onPress={() => navigation.navigate('Wishlist' as never)} />
             
+            {/* Surprise Widget */}
             <TouchableOpacity
-              style={[
-                styles.sendButton,
-                !newMessage.trim() && styles.sendButtonDisabled
-              ]}
-              onPress={sendMessage}
-              disabled={!newMessage.trim()}
+              style={styles.surpriseWidget}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                setShowSurpriseRoulette(true);
+              }}
               activeOpacity={0.8}
             >
               <LinearGradient
-                colors={newMessage.trim() ? ['#ff1493', '#8b008b'] : ['#666', '#444']}
-                style={styles.sendButtonGradient}
+                colors={['#8b008b', '#ff1493']}
+                style={styles.surpriseGradient}
               >
-                <Text style={styles.sendButtonText}>💕</Text>
+                <BlurView intensity={20} style={styles.surpriseContent}>
+                  <Text style={styles.surpriseEmoji}>🎁</Text>
+                  <Text style={styles.surpriseLabel}>Sorpresa</Text>
+                  <Text style={styles.surpriseSubtitle}>¡Ruleta secreta!</Text>
+                </BlurView>
               </LinearGradient>
             </TouchableOpacity>
+          </View>
+
+          {/* Quick Actions */}
+          <BlurView intensity={20} style={styles.quickActions}>
+            <Text style={styles.quickActionsTitle}>🚀 Acciones Rápidas</Text>
+            
+            <View style={styles.actionsGrid}>
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={() => navigation.navigate('Rules' as never)}
+                activeOpacity={0.8}
+              >
+                <LinearGradient
+                  colors={['#ff1493', '#8b008b']}
+                  style={styles.actionGradient}
+                >
+                  <Text style={styles.actionEmoji}>💖</Text>
+                  <Text style={styles.actionText}>Reglas</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={() => navigation.navigate('DailyQuestions' as never)}
+                activeOpacity={0.8}
+              >
+                <LinearGradient
+                  colors={['#3b82f6', '#1d4ed8']}
+                  style={styles.actionGradient}
+                >
+                  <Text style={styles.actionEmoji}>❓</Text>
+                  <Text style={styles.actionText}>Pregunta</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={() => navigation.navigate('Counters' as never)}
+                activeOpacity={0.8}
+              >
+                <LinearGradient
+                  colors={['#10b981', '#059669']}
+                  style={styles.actionGradient}
+                >
+                  <Text style={styles.actionEmoji}>📊</Text>
+                  <Text style={styles.actionText}>Contadores</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
           </BlurView>
-        </KeyboardAvoidingView>
+        </ScrollView>
       </SafeAreaView>
 
       {/* Surprise Roulette Modal */}
@@ -198,78 +156,121 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingVertical: 15,
+    paddingVertical: 20,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255, 20, 147, 0.3)',
   },
-  backButton: {
-    backgroundColor: 'rgba(255, 20, 147, 0.2)',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#ff1493',
-  },
-  backButtonText: {
-    color: '#ff69b4',
-    fontSize: 16,
-    fontWeight: '600',
-  },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 28,
     fontWeight: 'bold',
     color: '#ff69b4',
     textShadowColor: '#ff1493',
     textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 10,
+    textShadowRadius: 20,
+    textAlign: 'center',
   },
-  headerRight: {
-    alignItems: 'flex-end',
+  headerSubtitle: {
+    fontSize: 16,
+    color: '#d1d5db',
+    textAlign: 'center',
+    marginTop: 5,
   },
-  coupleStatus: {
-    fontSize: 12,
-    color: '#10b981',
-    fontWeight: '600',
-  },
-  chatContainer: {
+  content: {
     flex: 1,
   },
-  messagesList: {
-    flex: 1,
+  scrollContent: {
     paddingHorizontal: 20,
-  },
-  messagesContent: {
     paddingVertical: 20,
   },
-  messageContainer: {
+  mainWidget: {
+    marginBottom: 25,
+  },
+  widgetsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginBottom: 25,
+  },
+  surpriseWidget: {
+    width: (width - 50) / 2,
+    height: 120,
+    marginBottom: 10,
+    borderRadius: 20,
+    overflow: 'hidden',
+  },
+  surpriseGradient: {
+    flex: 1,
+  },
+  surpriseContent: {
+    flex: 1,
+    padding: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    borderRadius: 20,
+  },
+  surpriseEmoji: {
+    fontSize: 28,
+    marginBottom: 5,
+    textShadowColor: '#8b008b',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
+  },
+  surpriseLabel: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: 'white',
+    marginBottom: 2,
+  },
+  surpriseSubtitle: {
+    fontSize: 10,
+    color: 'rgba(255, 255, 255, 0.8)',
+    textAlign: 'center',
+  },
+  quickActions: {
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    borderRadius: 20,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: '#374151',
+  },
+  quickActionsTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#ff69b4',
+    textAlign: 'center',
     marginBottom: 15,
   },
-  myMessage: {
-    alignItems: 'flex-end',
+  actionsGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
   },
-  partnerMessage: {
-    alignItems: 'flex-start',
+  actionButton: {
+    width: 80,
+    height: 80,
+    borderRadius: 15,
+    overflow: 'hidden',
   },
-  messageBubble: {
-    maxWidth: '80%',
-    borderRadius: 20,
-    padding: 15,
-    borderWidth: 1,
+  actionGradient: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  myBubble: {
-    backgroundColor: 'rgba(255, 20, 147, 0.3)',
-    borderColor: '#ff1493',
+  actionEmoji: {
+    fontSize: 24,
+    marginBottom: 4,
   },
-  partnerBubble: {
-    backgroundColor: 'rgba(139, 92, 246, 0.3)',
-    borderColor: '#8b5cf6',
-  },
-  messageText: {
+  actionText: {
+    fontSize: 12,
+    fontWeight: 'bold',
     color: 'white',
+  },
+});
+
+export default HomeScreen;
+
     fontSize: 16,
     lineHeight: 22,
     marginBottom: 5,

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { Alert, Platform } from 'react-native';
+import { Platform } from 'react-native';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { supabase, authService, User, Couple } from '../lib/supabase';
 
@@ -83,9 +83,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setCouple(coupleInfo.couples);
       }
     } catch (error) {
-      console.error('Error loading user profile:', error);
+      if (__DEV__) {
+        console.error('Error loading user profile:', error);
+      }
       // Silently handle errors in production to prevent crashes
-      console.warn('Failed to load user profile, continuing with limited functionality');
     } finally {
       setLoading(false);
     }
@@ -97,7 +98,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await authService.signIn(email, password);
     } catch (error) {
       setLoading(false);
-      console.error('Sign in error:', error);
+      if (__DEV__) {
+        console.error('Sign in error:', error);
+      }
       throw error;
     }
   };
@@ -127,7 +130,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return { inviteCode: result.inviteCode };
     } catch (error) {
       setLoading(false);
-      console.error('Sign up couple error:', error);
+      if (__DEV__) {
+        console.error('Sign up couple error:', error);
+      }
       throw error;
     }
   };
@@ -143,7 +148,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await authService.joinCouple(email, password, name, inviteCode);
     } catch (error) {
       setLoading(false);
-      console.error('Join couple error:', error);
+      if (__DEV__) {
+        console.error('Join couple error:', error);
+      }
       throw error;
     }
   };
@@ -154,7 +161,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await authService.signOut();
     } catch (error) {
       setLoading(false);
-      console.error('Sign out error:', error);
+      if (__DEV__) {
+        console.error('Sign out error:', error);
+      }
       throw error;
     }
   };

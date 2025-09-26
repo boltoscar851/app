@@ -1,7 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 import { Platform } from 'react-native';
 import { Database } from '../types/database';
-import { EXPO_PUBLIC_SUPABASE_URL, EXPO_PUBLIC_SUPABASE_ANON_KEY } from '@env';
+
+const { EXPO_PUBLIC_SUPABASE_URL, EXPO_PUBLIC_SUPABASE_ANON_KEY } = process.env;
 
 // Get environment variables from react-native-dotenv
 const supabaseUrl = EXPO_PUBLIC_SUPABASE_URL;

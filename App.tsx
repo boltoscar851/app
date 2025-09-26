@@ -77,9 +77,10 @@ class ErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: any) {
-    console.error('App Error:', error, errorInfo);
+    if (__DEV__) {
+      console.error('App Error:', error, errorInfo);
+    }
     // Don't show alert in production to prevent crashes
-    console.warn('App crashed:', error.message);
   }
 
   render() {
@@ -268,7 +269,9 @@ export default function App() {
         // Pre-load fonts, make any API calls you need to do here
         await new Promise(resolve => setTimeout(resolve, 1000)); // Minimum loading time
       } catch (e) {
-        console.warn('Error during app preparation:', e);
+        if (__DEV__) {
+          console.warn('Error during app preparation:', e);
+        }
       } finally {
         // Tell the application to render
         setAppIsReady(true);
@@ -285,7 +288,9 @@ export default function App() {
         try {
           await SplashScreen.hideAsync();
         } catch (error) {
-          console.warn('Error hiding splash screen:', error);
+          if (__DEV__) {
+            console.warn('Error hiding splash screen:', error);
+          }
         }
       };
       
