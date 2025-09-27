@@ -25,15 +25,16 @@ import {
   Timestamp 
 } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import Constants from 'expo-constants';
 
 // Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyBQYyDMShze4A4uFjlEbpqqaAkOTk4oqWE",
-  authDomain: "nuestra-relacion.firebaseapp.com",
-  projectId: "nuestra-relacion",
-  storageBucket: "nuestra-relacion.firebasestorage.app",
-  messagingSenderId: "192379459077",
-  appId: "1:192379459077:android:88e13c3ec6e98174f36e6c"
+  apiKey: Constants.expoConfig?.extra?.FIREBASE_API_KEY || "AIzaSyBQYyDMShze4A4uFjlEbpqqaAkOTk4oqWE",
+  authDomain: Constants.expoConfig?.extra?.FIREBASE_AUTH_DOMAIN || "nuestra-relacion.firebaseapp.com",
+  projectId: Constants.expoConfig?.extra?.FIREBASE_PROJECT_ID || "nuestra-relacion",
+  storageBucket: Constants.expoConfig?.extra?.FIREBASE_STORAGE_BUCKET || "nuestra-relacion.firebasestorage.app",
+  messagingSenderId: Constants.expoConfig?.extra?.FIREBASE_MESSAGING_SENDER_ID || "192379459077",
+  appId: Constants.expoConfig?.extra?.FIREBASE_APP_ID || "1:192379459077:android:88e13c3ec6e98174f36e6c"
 };
 
 // Initialize Firebase

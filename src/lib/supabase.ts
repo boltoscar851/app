@@ -1,14 +1,22 @@
 import { createClient } from '@supabase/supabase-js';
 import { Platform } from 'react-native';
+import Constants from 'expo-constants';
 import { Database } from '../types/database';
 
-// Get environment variables from Expo
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+// Get environment variables from Expo Constants
+const supabaseUrl = Constants.expoConfig?.extra?.EXPO_PUBLIC_SUPABASE_URL || 
+                   Constants.manifest?.extra?.EXPO_PUBLIC_SUPABASE_URL ||
+                   process.env.EXPO_PUBLIC_SUPABASE_URL;
+                   
+const supabaseAnonKey = Constants.expoConfig?.extra?.EXPO_PUBLIC_SUPABASE_ANON_KEY || 
+                       Constants.manifest?.extra?.EXPO_PUBLIC_SUPABASE_ANON_KEY ||
+                       process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 
 // Validate environment variables
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables. Please check your .env file.');
+  console.error('Supabase URL:', supabaseUrl);
+  console.error('Supabase Key:', supabaseAnonKey ? 'Present' : 'Missing');
+  throw new Error('Missing Supabase environment variables. Please check your .env file and app.json configuration.');
 }
 
 // Create Supabase client

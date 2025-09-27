@@ -125,14 +125,17 @@ npm install -g eas-cli
 ### Configuración de Supabase
 ```bash
 # Copiar el archivo de configuración
-cp .env.example .env
+# Editar el archivo .env que ya existe en el proyecto
 
-# Editar .env con tus credenciales reales de Supabase:
-# EXPO_PUBLIC_SUPABASE_URL=https://tu-proyecto-real.supabase.co
-# EXPO_PUBLIC_SUPABASE_ANON_KEY=tu-clave-anonima-real
+# Reemplazar en .env con tus credenciales reales de Supabase:
+EXPO_PUBLIC_SUPABASE_URL=https://tu-proyecto-real.supabase.co
+EXPO_PUBLIC_SUPABASE_ANON_KEY=tu-clave-anonima-real
 ```
 
-**IMPORTANTE**: El proyecto usa `react-native-dotenv` para cargar automáticamente las variables del archivo `.env` durante el build. Solo necesitas configurar tus credenciales reales en el archivo `.env` y hacer el build normalmente.
+**IMPORTANTE**: 
+1. Configura tus credenciales reales de Supabase en el archivo `.env`
+2. Las variables se cargan automáticamente usando `expo-constants`
+3. Para builds de producción, las variables se incluyen en el bundle de forma segura
 
 ### Desarrollo
 ```bash
