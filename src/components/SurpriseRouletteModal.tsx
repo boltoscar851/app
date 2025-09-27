@@ -13,7 +13,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import { useAuth } from '../contexts/AuthContext';
-import { authService, Activity } from '../lib/supabase';
+import { firebaseService, Activity } from '../lib/firebase';
 
 interface SurpriseRouletteModalProps {
   visible: boolean;
@@ -49,7 +49,7 @@ const SurpriseRouletteModal: React.FC<SurpriseRouletteModalProps> = ({
     }).start();
     
     try {
-      const randomActivity = await authService.getRandomActivity('surprise', true, couple.id);
+      const randomActivity = await firebaseService.getRandomActivity('surprise', true, couple.id);
       
       setTimeout(() => {
         setSelectedActivity(randomActivity);
@@ -70,7 +70,7 @@ const SurpriseRouletteModal: React.FC<SurpriseRouletteModalProps> = ({
     
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      await authService.addActivityToCouple(couple.id, selectedActivity.id);
+      await firebaseService.addActivityToCouple(couple.id, selectedActivity.id);
       
       Alert.alert(
         '¡Sorpresa aceptada!', 

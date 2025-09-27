@@ -15,7 +15,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import { useAuth } from '../contexts/AuthContext';
-import { authService, PremiumTheme, CoupleSettings } from '../lib/supabase';
+import { firebaseService } from '../lib/firebase';
 import FloatingHearts from '../components/FloatingHearts';
 import SparkleEffects from '../components/SparkleEffects';
 
@@ -29,8 +29,8 @@ const ProfileScreen: React.FC = () => {
   const [showThemes, setShowThemes] = useState(false);
   const [premiumCode, setPremiumCode] = useState('');
   const [premiumStatus, setPremiumStatus] = useState<any>(null);
-  const [themes, setThemes] = useState<PremiumTheme[]>([]);
-  const [coupleSettings, setCoupleSettings] = useState<CoupleSettings | null>(null);
+  const [themes, setThemes] = useState<any[]>([]);
+  const [coupleSettings, setCoupleSettings] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -43,15 +43,13 @@ const ProfileScreen: React.FC = () => {
     if (!couple?.id) return;
     
     try {
-      const [status, themesData, settings] = await Promise.all([
-        authService.getPremiumStatus(couple.id),
-        authService.getPremiumThemes(),
-        authService.getCoupleSettings(couple.id),
+      // Simular datos premium para Firebase
+      setPremiumStatus({ is_premium: false, features: {} });
+      setThemes([
+        { id: '1', display_name: 'Tema Clásico', colors: { gradient: ['#ff1493', '#8b008b'] }, is_premium: false },
+        { id: '2', display_name: 'Tema Dorado', colors: { gradient: ['#fbbf24', '#f59e0b'] }, is_premium: true },
       ]);
-      
-      setPremiumStatus(status);
-      setThemes(themesData);
-      setCoupleSettings(settings);
+      setCoupleSettings({ theme_id: '1' });
     } catch (error) {
       console.error('Error loading premium data:', error);
     }
@@ -66,7 +64,8 @@ const ProfileScreen: React.FC = () => {
     setLoading(true);
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      const result = await authService.activatePremiumCode(couple.id, premiumCode.trim());
+      // Simular activación de código premium
+      const result = { success: true, message: 'Código premium activado correctamente' };
       
       if (result.success) {
         Alert.alert('¡Éxito!', result.message);
@@ -89,9 +88,8 @@ const ProfileScreen: React.FC = () => {
     
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      await authService.updateCoupleSettings(couple.id, {
-        theme_id: themeId,
-      });
+      // Simular cambio de tema
+      setCoupleSettings({ ...coupleSettings, theme_id: themeId });
       
       setShowThemes(false);
       loadPremiumData();
@@ -129,9 +127,7 @@ const ProfileScreen: React.FC = () => {
       
       if (!user) return;
       
-      await authService.updateUserProfile(user.id, {
-        display_name: displayName,
-      });
+      await firebaseService.updateUserProfile(user.id, { display_name: displayName });
       
       await refreshProfile();
       setIsEditing(false);

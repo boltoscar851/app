@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import { useAuth } from '../../contexts/AuthContext';
-import { authService } from '../../lib/supabase';
+import { firebaseService } from '../../lib/firebase';
 
 interface WishlistWidgetProps {
   onPress?: () => void;
@@ -25,7 +25,7 @@ const WishlistWidget: React.FC<WishlistWidgetProps> = ({ onPress }) => {
     if (!couple?.id) return;
     
     try {
-      const items = await authService.getWishlistItems(couple.id);
+      const items = await firebaseService.getWishlistItems(couple.id);
       const completed = items.filter(item => item.is_completed).length;
       
       setTotalWishes(items.length);

@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import { useAuth } from '../../contexts/AuthContext';
-import { authService } from '../../lib/supabase';
+import { firebaseService } from '../../lib/firebase';
 
 interface MessagesWidgetProps {
   onPress?: () => void;
@@ -25,7 +25,7 @@ const MessagesWidget: React.FC<MessagesWidgetProps> = ({ onPress }) => {
     if (!couple?.id) return;
     
     try {
-      const messages = await authService.getMessages(couple.id, 100);
+      const messages = await firebaseService.getMessages(couple.id, 100);
       setMessageCount(messages.length);
       
       if (messages.length > 0) {

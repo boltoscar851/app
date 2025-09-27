@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import { useAuth } from '../../contexts/AuthContext';
-import { authService, Event } from '../../lib/supabase';
+import { firebaseService, Event } from '../../lib/firebase';
 
 interface NextEventWidgetProps {
   onPress?: () => void;
@@ -25,7 +25,7 @@ const NextEventWidget: React.FC<NextEventWidgetProps> = ({ onPress }) => {
     if (!couple?.id) return;
     
     try {
-      const events = await authService.getEvents(couple.id);
+      const events = await firebaseService.getEvents(couple.id);
       const upcomingEvents = events.filter(e => new Date(e.date) >= new Date());
       
       if (upcomingEvents.length > 0) {

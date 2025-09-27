@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import { useAuth } from '../../contexts/AuthContext';
-import { authService } from '../../lib/supabase';
+import { firebaseService } from '../../lib/firebase';
 
 interface DiaryWidgetProps {
   onPress?: () => void;
@@ -25,7 +25,7 @@ const DiaryWidget: React.FC<DiaryWidgetProps> = ({ onPress }) => {
     if (!couple?.id) return;
     
     try {
-      const entries = await authService.getDiaryEntries(couple.id, 50);
+      const entries = await firebaseService.getDiaryEntries(couple.id, 50);
       setEntryCount(entries.length);
       
       if (entries.length > 0) {

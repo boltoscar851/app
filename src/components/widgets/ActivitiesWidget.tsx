@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import { useAuth } from '../../contexts/AuthContext';
-import { authService } from '../../lib/supabase';
+import { firebaseService } from '../../lib/firebase';
 
 interface ActivitiesWidgetProps {
   onPress?: () => void;
@@ -25,7 +25,7 @@ const ActivitiesWidget: React.FC<ActivitiesWidgetProps> = ({ onPress }) => {
     if (!couple?.id) return;
     
     try {
-      const activities = await authService.getCoupleActivities(couple.id);
+      const activities = await firebaseService.getCoupleActivities(couple.id);
       const completed = activities.filter(a => a.status === 'completed').length;
       const pending = activities.filter(a => a.status === 'pending').length;
       
