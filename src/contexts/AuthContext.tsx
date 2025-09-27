@@ -1,10 +1,9 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { Platform } from 'react-native';
-import { User as SupabaseUser } from '@supabase/supabase-js';
-import { supabase, authService, User, Couple } from '../lib/supabase';
+import { User as FirebaseUser } from 'firebase/auth';
+import { firebaseService, onAuthStateChange, User, Couple } from '../lib/firebase';
 
 interface AuthContextType {
-  user: SupabaseUser | null;
+  user: FirebaseUser | null;
   userProfile: User | null;
   couple: Couple | null;
   loading: boolean;
@@ -39,30 +38,21 @@ export const useAuth = () => {
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [user, setUser] = useState<FirebaseUser | null>(null);
   const [userProfile, setUserProfile] = useState<User | null>(null);
   const [couple, setCouple] = useState<Couple | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Obtener sesión inicial
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        loadUserProfile(session.user.id);
-      } else {
-        setLoading(false);
-      }
-    });
+    // Initialize default activities
+    firebaseService.initializeDefaultActivities().catch(console.error);
 
-    // Escuchar cambios de autenticación
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setUser(session?.user ?? null);
+    // Listen to auth state changes
+    const unsubscribe = onAuthStateChange(async (firebaseUser) => {
+      setUser(firebaseUser);
       
-      if (session?.user) {
-        await loadUserProfile(session.user.id);
+      if (firebaseUser) {
+        await loadUserProfile(firebaseUser.uid);
       } else {
         setUserProfile(null);
         setCouple(null);
@@ -70,21 +60,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     });
 
-    return () => subscription.unsubscribe();
+    return unsubscribe;
   }, []);
 
   const loadUserProfile = async (userId: string) => {
     try {
-      const profile = await authService.getUserProfile(userId);
+      const profile = await firebaseService.getUserProfile(userId);
       setUserProfile(profile);
 
       if (profile.couple_id) {
-        const coupleInfo = await authService.getCoupleInfo(userId);
-        setCouple(coupleInfo.couples);
+        const coupleInfo = await firebaseService.getCoupleInfo(userId);
+        setCouple(coupleInfo.couple);
       }
     } catch (error) {
       console.error('Error loading user profile:', error);
-      // Continue execution even if there's an error
     } finally {
       setLoading(false);
     }
@@ -93,7 +82,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signIn = async (email: string, password: string) => {
     setLoading(true);
     try {
-      await authService.signIn(email, password);
+      await firebaseService.signIn(email, password);
     } catch (error) {
       setLoading(false);
       console.error('Sign in error:', error);
@@ -111,9 +100,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     coupleName: string
   ) => {
     setLoading(true);
-    console.log('Starting signUpCouple process...');
     try {
-      const result = await authService.signUpCouple(
+      const result = await firebaseService.signUpCouple(
         email1,
         password1,
         name1,
@@ -122,8 +110,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         name2,
         coupleName
       );
-      // No hacer auto-login aquí, dejar que el usuario haga login manualmente
-      console.log('SignUpCouple successful:', result);
       setLoading(false);
       return { inviteCode: result.inviteCode };
     } catch (error) {
@@ -140,10 +126,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     inviteCode: string
   ) => {
     setLoading(true);
-    console.log('Starting joinCouple process...');
     try {
-      await authService.joinCouple(email, password, name, inviteCode);
-      console.log('JoinCouple successful');
+      await firebaseService.joinCouple(email, password, name, inviteCode);
     } catch (error) {
       setLoading(false);
       console.error('Join couple error:', error);
@@ -153,10 +137,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signOut = async () => {
     setLoading(true);
-    console.log('Starting signOut process...');
     try {
-      await authService.signOut();
-      console.log('SignOut successful');
+      await firebaseService.signOut();
     } catch (error) {
       setLoading(false);
       console.error('Sign out error:', error);
@@ -166,7 +148,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const refreshProfile = async () => {
     if (user) {
-      await loadUserProfile(user.id);
+      await loadUserProfile(user.uid);
     }
   };
 

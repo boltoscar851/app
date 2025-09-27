@@ -15,7 +15,7 @@ import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../contexts/AuthContext';
-import { authService, Event } from '../lib/supabase';
+import { firebaseService, Event } from '../lib/firebase';
 import FloatingHearts from '../components/FloatingHearts';
 
 const eventTypes = [
@@ -48,7 +48,7 @@ const CalendarScreen: React.FC = () => {
     if (!couple?.id) return;
     
     try {
-      const data = await authService.getEvents(couple.id);
+      const data = await firebaseService.getEvents(couple.id);
       setEvents(data);
     } catch (error: any) {
       Alert.alert('Error', 'No se pudieron cargar los eventos');
@@ -65,7 +65,7 @@ const CalendarScreen: React.FC = () => {
 
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      await authService.createEvent(
+      await firebaseService.createEvent(
         couple.id,
         user.id,
         title.trim(),

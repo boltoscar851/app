@@ -15,7 +15,7 @@ import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../contexts/AuthContext';
-import { authService, DiaryEntry } from '../lib/supabase';
+import { firebaseService, DiaryEntry } from '../lib/firebase';
 import FloatingHearts from '../components/FloatingHearts';
 
 const moods = [
@@ -50,7 +50,7 @@ const DiaryScreen: React.FC = () => {
     if (!couple?.id) return;
     
     try {
-      const data = await authService.getDiaryEntries(couple.id);
+      const data = await firebaseService.getDiaryEntries(couple.id);
       setEntries(data);
     } catch (error: any) {
       Alert.alert('Error', 'No se pudieron cargar las entradas del diario');
@@ -67,7 +67,7 @@ const DiaryScreen: React.FC = () => {
 
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      await authService.createDiaryEntry(
+      await firebaseService.createDiaryEntry(
         couple.id,
         user.id,
         title.trim(),

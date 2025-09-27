@@ -15,7 +15,7 @@ import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../contexts/AuthContext';
-import { authService, Activity, CoupleActivity } from '../lib/supabase';
+import { firebaseService, Activity, CoupleActivity } from '../lib/firebase';
 import FloatingHearts from '../components/FloatingHearts';
 import SparkleEffects from '../components/SparkleEffects';
 
@@ -58,8 +58,8 @@ const ActivitiesScreen: React.FC = () => {
     
     try {
       const [activitiesData, coupleActivitiesData] = await Promise.all([
-        authService.getActivities(),
-        authService.getCoupleActivities(couple.id),
+        firebaseService.getActivities(),
+        firebaseService.getCoupleActivities(couple.id),
       ]);
       
       setActivities(activitiesData);
@@ -87,7 +87,7 @@ const ActivitiesScreen: React.FC = () => {
     
     try {
       const category = selectedCategory === 'all' ? undefined : selectedCategory;
-      const randomActivity = await authService.getRandomActivity(category, true, couple.id);
+      const randomActivity = await firebaseService.getRandomActivity(category, true, couple.id);
       
       setTimeout(() => {
         setRouletteActivity(randomActivity);
@@ -107,7 +107,7 @@ const ActivitiesScreen: React.FC = () => {
     
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      await authService.addActivityToCouple(couple.id, rouletteActivity.id);
+      await firebaseService.addActivityToCouple(couple.id, rouletteActivity.id);
       setRouletteActivity(null);
       loadData();
       Alert.alert('¡Genial!', 'La actividad ha sido añadida a vuestra lista');
@@ -119,9 +119,9 @@ const ActivitiesScreen: React.FC = () => {
   const completeActivity = async (coupleActivityId: string, rating: number) => {
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      await authService.updateCoupleActivity(coupleActivityId, {
+      await firebaseService.updateCoupleActivity(coupleActivityId, {
         status: 'completed',
-        completed_at: new Date().toISOString(),
+        completed_at: new Date(),
         rating,
       });
       loadData();

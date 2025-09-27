@@ -15,7 +15,7 @@ import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../contexts/AuthContext';
-import { authService, WeeklyChallenge } from '../lib/supabase';
+import { firebaseService, WeeklyChallenge } from '../lib/firebase';
 import FloatingHearts from '../components/FloatingHearts';
 
 const predefinedChallenges = [
@@ -67,7 +67,7 @@ const ChallengesScreen: React.FC = () => {
     if (!couple?.id) return;
     
     try {
-      const data = await authService.getWeeklyChallenges(couple.id);
+      const data = await firebaseService.getWeeklyChallenges(couple.id);
       setChallenges(data);
     } catch (error: any) {
       Alert.alert('Error', 'No se pudieron cargar los retos');
@@ -81,7 +81,7 @@ const ChallengesScreen: React.FC = () => {
 
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      await authService.createWeeklyChallenge(couple.id, challengeTitle, challengeDescription);
+      await firebaseService.createWeeklyChallenge(couple.id, challengeTitle, challengeDescription);
       
       setTitle('');
       setDescription('');
@@ -98,9 +98,9 @@ const ChallengesScreen: React.FC = () => {
   const completeChallenge = async (challengeId: string) => {
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-      await authService.updateWeeklyChallenge(challengeId, {
+      await firebaseService.updateWeeklyChallenge(challengeId, {
         status: 'completed',
-        completed_at: new Date().toISOString(),
+        completed_at: new Date(),
       });
       
       loadChallenges();

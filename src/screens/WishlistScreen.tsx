@@ -15,7 +15,7 @@ import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../contexts/AuthContext';
-import { authService, WishlistItem } from '../lib/supabase';
+import { firebaseService, WishlistItem } from '../lib/firebase';
 import FloatingHearts from '../components/FloatingHearts';
 
 const categories = [
@@ -57,7 +57,7 @@ const WishlistScreen: React.FC = () => {
     if (!couple?.id) return;
     
     try {
-      const data = await authService.getWishlistItems(couple.id);
+      const data = await firebaseService.getWishlistItems(couple.id);
       setWishlistItems(data);
     } catch (error: any) {
       Alert.alert('Error', 'No se pudieron cargar los elementos de la lista');
@@ -76,7 +76,7 @@ const WishlistScreen: React.FC = () => {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       const cost = estimatedCost ? parseFloat(estimatedCost) : undefined;
       
-      await authService.createWishlistItem(
+      await firebaseService.createWishlistItem(
         couple.id,
         user.id,
         title.trim(),
@@ -103,9 +103,9 @@ const WishlistScreen: React.FC = () => {
   const toggleCompleted = async (item: WishlistItem) => {
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      await authService.updateWishlistItem(item.id, {
+      await firebaseService.updateWishlistItem(item.id, {
         is_completed: !item.is_completed,
-        completed_at: !item.is_completed ? new Date().toISOString() : null,
+        completed_at: !item.is_completed ? new Date() : undefined,
       });
       
       loadWishlistItems();
@@ -130,7 +130,7 @@ const WishlistScreen: React.FC = () => {
           onPress: async () => {
             try {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-              await authService.deleteWishlistItem(itemId);
+              await firebaseService.deleteWishlistItem(itemId);
               loadWishlistItems();
             } catch (error: any) {
               Alert.alert('Error', 'No se pudo eliminar el elemento');

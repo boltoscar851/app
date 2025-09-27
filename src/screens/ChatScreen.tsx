@@ -17,7 +17,7 @@ import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../contexts/AuthContext';
-import { authService, Message } from '../lib/supabase';
+import { firebaseService, Message } from '../lib/firebase';
 import FloatingHearts from '../components/FloatingHearts';
 import StickerPicker from '../components/StickerPicker';
 import VoiceNoteRecorder from '../components/VoiceNoteRecorder';
@@ -38,16 +38,13 @@ const ChatScreen: React.FC = () => {
       loadMessages();
       
       // Suscribirse a mensajes en tiempo real
-      const subscription = authService.subscribeToMessages(couple.id, (payload) => {
-        if (payload.new) {
-          const newMsg = payload.new as Message;
-          setMessages(prev => [newMsg, ...prev]);
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        }
+      const unsubscribe = firebaseService.subscribeToMessages(couple.id, (messages) => {
+        setMessages(messages);
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       });
 
       return () => {
-        subscription.unsubscribe();
+        unsubscribe();
       };
     }
   }, [couple?.id]);
@@ -56,7 +53,7 @@ const ChatScreen: React.FC = () => {
     if (!couple?.id) return;
     
     try {
-      const data = await authService.getMessages(couple.id);
+      const data = await firebaseService.getMessages(couple.id);
       setMessages(data);
     } catch (error: any) {
       Alert.alert('Error', 'No se pudieron cargar los mensajes');
@@ -70,7 +67,7 @@ const ChatScreen: React.FC = () => {
 
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      await authService.sendMessage(couple.id, user.id, content.trim(), messageType);
+      await firebaseService.sendMessage(couple.id, user.id, content.trim(), messageType);
       if (messageType === 'text') {
         setNewMessage('');
       }
